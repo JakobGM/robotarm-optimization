@@ -1,0 +1,9 @@
+# Python relevant
+__pycache__/
+*.pyc
+
+# Vim editor relevant
+*.swp
+
+# MacOS relevant
+*DS_STORE
