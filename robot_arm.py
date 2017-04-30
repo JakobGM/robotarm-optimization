@@ -2,23 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import ImageMagickWriter
 from matplotlib.patches import Wedge
-from methods_project_old import BFGS
+from methods import BFGS
 
 
 class RobotArm:
-    def __init__(self, lengths, destination, theta=None, precision=1e-2):
-        assert lengths.ndim == 1
-        assert len(destination) == 2
+    def __init__(self, lengths, destinations, theta=None, precision=1e-2):
+        # Testing if all data types are sensible
+        assert all([len(point) == 2 for point in destinations])
+        assert all([isinstance(attribute, tuple) for attribute in (lengths, destinations,)])
+
+        # Object attributes
         self.lengths = lengths
         self.reach = np.sum(lengths)
         self.n = len(lengths)
-        self.p = destination
+        self.destinations = destinations
         self.precision = precision
 
         if theta is None:
             self._theta = np.zeros(self.n)
         else:
-            assert theta.ndim == 1
+            assert isinstance(theta, tuple)
             self._theta = theta
 
         self._path = self.theta
@@ -155,8 +158,10 @@ class RobotArm:
 
         self._set_plot_options()
 
-        plt.plot(x, y, '-o')
-        plt.plot(self.p[0], self.p[1], 'x')
+        # Plot all the points that shall be reached
+        for p in self.destinations:
+            plt.plot(x, y, '-o')
+            plt.plot(p[0], p[1], 'x')
 
         # Plot configuration space of robot
         configuration_space = Wedge((0, 0), r=self.reach, theta1=0, theta2=360, width=self.reach - self.inner_reach,
@@ -179,7 +184,9 @@ class RobotArm:
 
         # Padding
         a = 1.1
-        m = max(abs(self.p[0]), abs(self.p[1]), self.reach)
+        max_x = abs(max(self.destinations, key=lambda p: abs(p[0]))[0])
+        max_y = abs(max(self.destinations, key=lambda p: abs(p[1]))[1])
+        m = max(max_x, max_y, self.reach)
 
         ax.set_xlim(-a * m, a * m)
         ax.set_ylim(-a * m, a * m)
