@@ -1,9 +1,10 @@
-from numpy import testing
 import unittest
+import numbers
 import numpy as np
 from numpy import pi
 
 from robot_arm import RobotArm
+from robot_arm import objective
 
 
 class TestRobotArm(unittest.TestCase):
@@ -48,3 +49,24 @@ class TestRobotArm(unittest.TestCase):
                 self.lengths,
                 self.destinations,
                 np.array(self.theta))
+
+
+class TestObjectiveFunction(unittest.TestCase):
+
+    def setUp(self):
+        self.thetas = np.array(((0.5, 2, 3,), (4, 5, 6,),))
+        self.thetas.setflags(write=False)
+
+    def test_theta_size(self):
+        self.assertEqual(self.thetas.shape, (2, 3))
+
+    def test_return_type(self):
+        self.assertIsInstance(objective(self.thetas), numbers.Number)
+
+    def test_correct_objective_value(self):
+        self.assertEqual(objective(self.thetas), 31/4)
+
+    def test_immutability(self):
+        original = self.thetas
+        objective(self.thetas)
+        np.testing.assert_equal(original, self.thetas)

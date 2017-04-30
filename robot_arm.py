@@ -4,6 +4,12 @@ from matplotlib.animation import ImageMagickWriter
 from matplotlib.patches import Wedge
 from methods import BFGS
 
+def objective(thetas):
+    assert isinstance(thetas, np.ndarray)
+    rotated = np.roll(thetas.copy(), shift=-1, axis=1)
+    deltas = rotated - thetas
+    return 0.5 * np.sum(deltas**2)
+
 
 class RobotArm:
     def __init__(self, lengths, destinations, theta=None, precision=1e-2):
@@ -55,6 +61,7 @@ class RobotArm:
             print("Point outside interior of configuration space. Minimum found analytically.")
             self.move_closest_to_out_of_reach(internal=True)
         else:
+            raise NotImpelmentedError
             BFGS(self.theta, self.f, self.gradient, self.precision)
 
     @property
@@ -229,18 +236,4 @@ class RobotArm:
         plt.show()
 
 if __name__ == '__main__':
-    # theta = np.array([np.pi / 4, np.pi / 4, np.pi / 3]).reshape((3, 1))
-    # lengths = np.ones(3).reshape((3, 1))
-    # p = np.array([1, 2]).reshape(2,1)
-    # EVE = RobotArm(lengths, p, theta)
-    #
-    # theta_sequence = np.zeros((3, 100))
-    # theta_sequence[:, 0] = theta[:, 0]
-    # for n in range(99):
-    #     theta_sequence[:, n + 1] = theta_sequence[:, n]
-    #     theta_sequence[0, n] = 2 * np.pi / 100 * n
-    #     theta_sequence[1, n] = np.pi / 25 * n
-    #     EVE.move_to(theta_sequence[:, n].reshape(3, 1))
-    #
-    # EVE.save_animation()
-    WALLE = RobotArm(np.ones(3), destination=np.array([2, 2]))
+    WALLE = RobotArm((1,1,1,), destinations=((2, 2,), (1,2,)))
