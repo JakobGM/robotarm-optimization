@@ -1,3 +1,4 @@
+import plotting
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import ImageMagickWriter
@@ -21,7 +22,8 @@ class RobotArm:
         self.lengths = lengths
         self.reach = np.sum(lengths)
         self.n = len(lengths)
-        self.destinations = destinations
+        self.destinations = np.array(destinations)
+        self.destinations.setflags(write=False)
         self.precision = precision
 
         if theta is None:
@@ -31,8 +33,6 @@ class RobotArm:
             self._theta = theta
 
         self._path = self.theta
-
-        self._set_plot_options()
 
         self.longest = np.argmax(lengths)
         self.annulus = self.lengths[self.longest] > np.sum(np.delete(self.lengths, self.longest))
@@ -158,45 +158,13 @@ class RobotArm:
         self.theta = theta
         return self._hessian()
 
-    def plot(self, show=True):
+    # Plotting stuff
+    def plot_movement(self):
         joint_positions = self.position(joints=True)
-        x = np.hstack((0, joint_positions[0, :]))
-        y = np.hstack((0, joint_positions[1, :]))
+        path = plotting.path_figure(joint_positions, destinations)
+        path.show()
 
-        self._set_plot_options()
 
-        # Plot all the points that shall be reached
-        for p in self.destinations:
-            plt.plot(x, y, '-o')
-            plt.plot(p[0], p[1], 'x')
-
-        # Plot configuration space of robot
-        configuration_space = Wedge((0, 0), r=self.reach, theta1=0, theta2=360, width=self.reach - self.inner_reach,
-                                    facecolor='grey', alpha=0.3, edgecolor='black', linewidth=0.6)
-
-        ax = plt.gca()
-        ax.add_patch(configuration_space)
-
-        if show is True:
-            plt.show()
-
-    def _set_plot_options(self):
-        plt.style.use('ggplot')
-
-        ax = plt.gca()
-        ax.set_autoscale_on(False)
-
-        ax.axhline(y=0, color='grey')
-        ax.axvline(x=0, color='grey')
-
-        # Padding
-        a = 1.1
-        max_x = abs(max(self.destinations, key=lambda p: abs(p[0]))[0])
-        max_y = abs(max(self.destinations, key=lambda p: abs(p[1]))[1])
-        m = max(max_x, max_y, self.reach)
-
-        ax.set_xlim(-a * m, a * m)
-        ax.set_ylim(-a * m, a * m)
 
     def save_animation(self, fps=5, time=5, *, filename="robot_animation.gif"):
         original_position = self.theta
@@ -234,6 +202,3 @@ class RobotArm:
         plt.title('Convergence plot')
 
         plt.show()
-
-if __name__ == '__main__':
-    WALLE = RobotArm((1,1,1,), destinations=((2, 2,), (1,2,)))
