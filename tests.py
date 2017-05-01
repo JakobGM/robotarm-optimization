@@ -5,6 +5,7 @@ from numpy import pi
 
 from robot_arm import RobotArm
 from robot_arm import objective
+from plotting import path_figure, position_fig
 
 
 class TestRobotArm(unittest.TestCase):
@@ -50,6 +51,22 @@ class TestRobotArm(unittest.TestCase):
                 self.destinations,
                 np.array(self.theta))
 
+    def test_destinations_properties(self):
+        robot_arm = RobotArm(self.lengths, self.destinations, self.theta)
+        self.assertIsInstance(robot_arm.destinations, np.ndarray)
+
+        # Check if points are 2D
+        self.assertTrue(robot_arm.destinations.shape[0] == 2)
+
+        # Check if destinations are immutable
+        self.assertRaises(
+            RuntimeError,
+            robot_arm.destinations.__set_item__,
+            0,
+            0,
+            None
+        )
+
 
 class TestObjectiveFunction(unittest.TestCase):
 
@@ -70,3 +87,42 @@ class TestObjectiveFunction(unittest.TestCase):
         original = self.thetas
         objective(self.thetas)
         np.testing.assert_equal(original, self.thetas)
+
+
+class TestPlotting(unittest.TestCase):
+
+    def setUp(self):
+        self.lengths = (3, 2, 2,)
+        self.destinations = (
+                (5, 0,),
+                (4, 2,),
+                (6, 0.5),
+                (4, -2),
+                (5, -1),
+        )
+        self.theta = (pi, pi/2, 0,)
+        self.robot_arm = RobotArm(
+            lengths=self.lengths,
+            destinations=self.destinations,
+            theta=self.theta
+        )
+        n = len(self.lengths)
+        s = len(self.destinations)
+        total_joints = n*s
+        self.joint_positions_matrix = np.arange(total_joints).reshape((n, s))
+
+    def test_path_figure_return(self):
+        return_value = path_figure(self.joint_positions_matrix, self.robot_arm)
+        self.assertEqual(return_value, None)
+
+    def test_plot_pure_functon(self):
+        # Save values before function invocation
+        original_destinations = self.robot_arm.destinations.copy()
+        original_joint_positions_matrix = self.joint_positions_matrix.copy()
+
+        # Run the pure function
+        path_figure(self.joint_positions_matrix, self.robot_arm)
+
+        # Assert that none of the arguments have been changed
+        np.testing.assert_array_equal(original_destinations, self.robot_arm.destinations)
+        np.testing.assert_array_equal(original_joint_positions_matrix, self.joint_positions_matrix)
