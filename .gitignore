@@ -7,3 +7,6 @@ __pycache__/
 
 # MacOS relevant
 *DS_STORE
+
+# Rope package for python autocomplete
+.ropeproject
