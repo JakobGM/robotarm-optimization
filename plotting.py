@@ -1,15 +1,17 @@
 from matplotlib import pyplot as plt
+from matplotlib.patches import Wedge
 import numpy as np
 
 
-def path_figure(joint_positions_matrix, robot_arm):
+def path_figure(theta_matrix, robot_arm):
     """
     Arguments:
-    joint_positions_matrix - A
+    theta_matrix
+    robot_arm
     TODO: Write docstring
     """
     # Check input arguments
-    if not joint_positions_matrix.shape[1] == robot_arm.destinations.shape[1]:
+    if not theta_matrix.shape == (robot_arm.n, robot_arm.destinations.shape[1]):
         raise ValueError('''
                         The number of joint positions does not match the
                          number of destination points
@@ -23,7 +25,8 @@ def path_figure(joint_positions_matrix, robot_arm):
         set_axis_options(ax, robot_arm)
 
     # Plotting content of each subplot
-    pass
+    for index, theta in enumerate(theta_matrix.T):
+        plot_position(axes[index], theta, robot_arm)
 
 def set_axis_options(ax, robot_arm):
     ax.set_autoscale_on(False)
@@ -40,29 +43,22 @@ def set_axis_options(ax, robot_arm):
     ax.set_xlim(-a * m, a * m)
     ax.set_ylim(-a * m, a * m)
 
-def position_fig(joint_positions, destination):
-    pass
 
-
-
-def plot(joint_positions, destinations, reach, inner_reach):
-    joint_positions = position(joints=True)
+def plot_position(axis, theta, robot_arm):
+    joint_positions = robot_arm.joint_positions(theta)
     x = np.hstack((0, joint_positions[0, :]))
     y = np.hstack((0, joint_positions[1, :]))
-
-    set_plot_options()
+    axis.plot(x, y, '-o')
 
     # Plot all the points that shall be reached
-    for p in destinations:
-        plt.plot(x, y, '-o')
-        plt.plot(p[0], p[1], 'x')
+    for p in robot_arm.destinations.T:
+        axis.plot(p[0], p[1], 'x')
 
     # Plot configuration space of robot
-    configuration_space = Wedge((0, 0), r=reach, theta1=0, theta2=360, width=reach - inner_reach,
+    configuration_space = Wedge((0, 0), r=reach, theta1=0, theta2=360, width=robot_arm.reach - robot_arm.inner_reach,
                                 facecolor='grey', alpha=0.3, edgecolor='black', linewidth=0.6)
 
-    ax = plt.gca()
-    ax.add_patch(configuration_space)
+    axis.add_patch(configuration_space)
 
     if show is True:
         plt.show()

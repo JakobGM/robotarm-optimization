@@ -91,6 +91,18 @@ class RobotArm:
                 theta[self.longest + 1] += np.pi
         self.move_to(theta)
 
+    def joint_positions(self, theta):
+        '''
+        Given a thata vector, this returns where the joints will be located.
+        '''
+        # The effective angles of each joint relative to x-axis
+        joint_angles = np.cumsum(self.theta)
+
+        # Components of each joint vector
+        normalized_components = np.array([np.cos(joint_angles), np.sin(joint_angles)]).reshape((2, self.n))
+        components = normalized_components * self.lengths.transpose()
+        return np.cumsum(components, axis=1).reshape((2, self.n))
+
     def position(self, joints=False):
         # The effective angles of each joint relative to x-axis
         joint_angles = np.cumsum(self.theta)

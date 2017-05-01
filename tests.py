@@ -5,7 +5,7 @@ from numpy import pi
 
 from robot_arm import RobotArm
 from robot_arm import objective
-from plotting import path_figure, position_fig
+from plotting import path_figure, plot_position
 
 
 class TestRobotArm(unittest.TestCase):
@@ -92,37 +92,37 @@ class TestObjectiveFunction(unittest.TestCase):
 class TestPlotting(unittest.TestCase):
 
     def setUp(self):
-        self.lengths = (3, 2, 2,)
-        self.destinations = (
+        lengths = (3, 2, 2,)
+        destinations = (
                 (5, 0,),
                 (4, 2,),
                 (6, 0.5),
                 (4, -2),
                 (5, -1),
         )
-        self.theta = (pi, pi/2, 0,)
+        theta = (pi, pi/2, 0,)
         self.robot_arm = RobotArm(
-            lengths=self.lengths,
-            destinations=self.destinations,
-            theta=self.theta
+            lengths=lengths,
+            destinations=destinations,
+            theta=theta
         )
-        n = len(self.lengths)
-        s = len(self.destinations)
+        n = len(lengths)
+        s = len(destinations)
         total_joints = n*s
-        self.joint_positions_matrix = np.arange(total_joints).reshape((n, s))
+        self.theta_matrix = np.arange(total_joints).reshape((n, s))
 
     def test_path_figure_return(self):
-        return_value = path_figure(self.joint_positions_matrix, self.robot_arm)
+        return_value = path_figure(self.theta_matrix, self.robot_arm)
         self.assertEqual(return_value, None)
 
     def test_plot_pure_functon(self):
         # Save values before function invocation
         original_destinations = self.robot_arm.destinations.copy()
-        original_joint_positions_matrix = self.joint_positions_matrix.copy()
+        original_theta_matrix = self.theta_matrix.copy()
 
         # Run the pure function
-        path_figure(self.joint_positions_matrix, self.robot_arm)
+        path_figure(self.theta_matrix, self.robot_arm)
 
         # Assert that none of the arguments have been changed
         np.testing.assert_array_equal(original_destinations, self.robot_arm.destinations)
-        np.testing.assert_array_equal(original_joint_positions_matrix, self.joint_positions_matrix)
+        np.testing.assert_array_equal(original_theta_matrix, self.theta_matrix)
