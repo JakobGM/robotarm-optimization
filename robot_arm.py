@@ -5,11 +5,50 @@ from matplotlib.animation import ImageMagickWriter
 from matplotlib.patches import Wedge
 from methods import BFGS
 
+
 def objective(thetas):
     assert isinstance(thetas, np.ndarray)
     rotated = np.roll(thetas.copy(), shift=-1, axis=1)
     deltas = rotated - thetas
-    return 0.5 * np.sum(deltas**2)
+    return 0.5 * np.sum(deltas ** 2)
+
+
+def objective_gradient(thetas):
+    assert isinstance(thetas, np.ndarray)
+    n = thetas.shape[0]
+    s = thetas.shape[1]
+    objective_gradient_matrix = np.zeros((n, s))
+    for j in range(s):
+        for i in range(n):
+            if (j > 0) and j < (s - 1):
+                objective_gradient_matrix[i, j] = 2 * thetas[i, j] - (thetas[i, j - 1] + thetas[i, j + 1])
+            elif j == 0:
+                objective_gradient_matrix[i, j] = 2 * thetas[i, j] - (thetas[i, s - 1] + thetas[i, 1])
+            elif j == s - 1:
+                objective_gradient_matrix[i, j] = 2 * thetas[i, j] - (thetas[i, s - 2] + thetas[i, 0])
+    return objective_gradient_matrix
+
+
+def constraint_gradient(thetas, lengths, constraint_number):
+    assert isinstance(thetas, np.ndarray)
+    n = thetas.shape[0]
+    s = thetas.shape[1]
+    assert n == len(lengths)
+    constraint_gradient_matrix = np.zeros((n, s))
+    if constraint_number % 2 == 0:
+        index = (constraint_number + 1) // 2 - 1
+    else:
+        index = constraint_number // 2
+    theta_cum_sum = np.cumsum(thetas[:, index])
+    theta_cum_prod = np.cumprod(thetas[:, index])
+    elements_in_outer_sum = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            elements_in_outer_sum[j] = lengths[j] * theta_cum_sum[j] * np.sin(theta_cum_prod[j]) \
+                                          / thetas[j, index]
+        constraint_gradient_matrix[:, index] = -np.sum(elements_in_outer_sum[i:])
+    return constraint_gradient_matrix
+
 
 
 class RobotArm:
@@ -152,7 +191,6 @@ class RobotArm:
         K, L = np.meshgrid(indices, indices)
         return np.vectorize(f_second_derivative)(K, L)
 
-
     # Optimization methods
     def f(self, theta, save=False):
         # TODO: Change API
@@ -175,8 +213,6 @@ class RobotArm:
         joint_positions = self.position(joints=True)
         path = plotting.path_figure(joint_positions, destinations)
         path.show()
-
-
 
     def save_animation(self, fps=5, time=5, *, filename="robot_animation.gif"):
         original_position = self.theta
