@@ -6,17 +6,19 @@ import numpy as np
 def path_figure(theta_matrix, robot_arm):
     """
     Arguments:
-    theta_matrix
-    robot_arm
-    TODO: Write docstring
+    theta_matrix - A set of theta column vectors
+    robot_arm - An object of the RobotArm class
+
+    Returns:
+    None, but plots the configuration of each theta vector as subplots
     """
     # Check input arguments
-    if not theta_matrix.shape == (robot_arm.n, robot_arm.destinations.shape[1]):
+    num_of_destinations = robot_arm.destinations.shape[1]
+    if not theta_matrix.shape == (robot_arm.n, num_of_destinations):
         raise ValueError('''
                         The number of joint positions does not match the
                          number of destination points
                          ''')
-    num_of_destinations = destinations.shape[1]
 
     # Set up plot style options
     plt.style.use('ggplot')
@@ -27,6 +29,7 @@ def path_figure(theta_matrix, robot_arm):
     # Plotting content of each subplot
     for index, theta in enumerate(theta_matrix.T):
         plot_position(axes[index], theta, robot_arm)
+
 
 def set_axis_options(ax, robot_arm):
     ax.set_autoscale_on(False)
@@ -55,10 +58,16 @@ def plot_position(axis, theta, robot_arm):
         axis.plot(p[0], p[1], 'x')
 
     # Plot configuration space of robot
-    configuration_space = Wedge((0, 0), r=reach, theta1=0, theta2=360, width=robot_arm.reach - robot_arm.inner_reach,
-                                facecolor='grey', alpha=0.3, edgecolor='black', linewidth=0.6)
+    configuration_space = Wedge(
+        (0, 0),
+        r=robot_arm.reach,
+        theta1=0,
+        theta2=360,
+        width=robot_arm.reach - robot_arm.inner_reach,
+        facecolor='grey',
+        alpha=0.3,
+        edgecolor='black',
+        linewidth=0.6
+    )
 
     axis.add_patch(configuration_space)
-
-    if show is True:
-        plt.show()

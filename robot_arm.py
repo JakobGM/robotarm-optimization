@@ -73,12 +73,18 @@ def constraint_gradient(thetas, lengths, constraint_number):
 
 class RobotArm:
     def __init__(self, lengths, destinations, theta=None, precision=1e-2):
-        # Testing if all data types are sensible
-        assert all([len(point) == 2 for point in destinations])
-        assert all([isinstance(attribute, tuple) for attribute in (lengths, destinations,)])
+        # Input validation
+        if not len(destinations) == 2:
+            raise ValueError('Destinations are not in R2')
+        if not len(destinations[0]) == len(destinations[1]):
+            raise ValueError('Not the same number of x- and y-coordinates')
+        if not isinstance(lengths, tuple) or not isinstance(destinations, tuple):
+            raise TypeError('Arguments should be given as tuples')
+
 
         # Object attributes
-        self.lengths = lengths
+        self.lengths = np.array(lengths)
+        self.lengths.setflags(write=False)
         self.reach = np.sum(lengths)
         self.n = len(lengths)
         self.destinations = np.array(destinations)
@@ -88,7 +94,8 @@ class RobotArm:
         if theta is None:
             self._theta = np.zeros(self.n)
         else:
-            assert isinstance(theta, tuple)
+            if not isinstance(theta, tuple):
+                raise TypeError('Theta should be given as a tuple')
             self._theta = theta
 
         self._path = self.theta
@@ -152,7 +159,7 @@ class RobotArm:
 
     def joint_positions(self, theta):
         '''
-        Given a thata vector, this returns where the joints will be located.
+        Given a theta vector, this returns where the joints will be located.
         '''
         # The effective angles of each joint relative to x-axis
         joint_angles = np.cumsum(self.theta)

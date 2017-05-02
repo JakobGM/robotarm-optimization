@@ -12,11 +12,8 @@ class TestRobotArm(unittest.TestCase):
     def setUp(self):
         self.lengths = (3, 2, 2,)
         self.destinations = (
-            (5, 0,),
-            (4, 2,),
-            (6, 0.5),
-            (4, -2),
-            (5, -1),
+            (5, 4, 6, 4, 5),
+            (0, 2, 0.5, -2, -1),
         )
         self.theta = (pi, pi / 2, 0,)
 
@@ -28,15 +25,18 @@ class TestRobotArm(unittest.TestCase):
 
     def test_wrong_lengths_type(self):
         self.assertRaises(
-            AssertionError,
+            TypeError,
             RobotArm,
+            (
             np.array(self.lengths),
             self.destinations,
-            self.theta)
+            self.theta
+            )
+        )
 
     def test_wrong_destinations_type(self):
         self.assertRaises(
-            AssertionError,
+            TypeError,
             RobotArm,
             self.lengths,
             np.array(self.destinations),
@@ -44,7 +44,7 @@ class TestRobotArm(unittest.TestCase):
 
     def test_wrong_theta_type(self):
         self.assertRaises(
-            AssertionError,
+            TypeError,
             RobotArm,
             self.lengths,
             self.destinations,
@@ -59,11 +59,10 @@ class TestRobotArm(unittest.TestCase):
 
         # Check if destinations are immutable
         self.assertRaises(
-            RuntimeError,
-            robot_arm.destinations.__set_item__,
+            ValueError,
+            robot_arm.destinations.__setitem__,
+            (0, 0,),
             0,
-            0,
-            None
         )
 
 
@@ -125,11 +124,8 @@ class TestPlotting(unittest.TestCase):
     def setUp(self):
         lengths = (3, 2, 2,)
         destinations = (
-            (5, 0,),
-            (4, 2,),
-            (6, 0.5),
-            (4, -2),
-            (5, -1),
+            (5, 4, 6, 4, 5),
+            (0, 2, 0.5, -2, -1),
         )
         theta = (pi, pi / 2, 0,)
         self.robot_arm = RobotArm(
@@ -138,7 +134,7 @@ class TestPlotting(unittest.TestCase):
             theta=theta
         )
         n = len(lengths)
-        s = len(destinations)
+        s = len(destinations[0])
         total_joints = n * s
         self.theta_matrix = np.arange(total_joints).reshape((n, s))
 
