@@ -71,6 +71,16 @@ def constraint_gradient(thetas, lengths, constraint_number):
     return constraint_gradient_matrix
 
 
+def constraint_grad_set(thetas, lengths):
+    n = thetas.shape[0]
+    s = thetas.shape[1]
+    constraint_set = np.zeros((n * s, 2 * s))
+    for i in range(1, 2 * s + 1):
+        constraint_grad = constraint_gradient(thetas, lengths, i).flatten('F').reshape((n * s,))
+        constraint_set[:, i - 1] = constraint_grad
+    return constraint_set
+
+
 class RobotArm:
     def __init__(self, lengths, destinations, theta=None, precision=1e-2):
         # Input validation
@@ -80,7 +90,6 @@ class RobotArm:
             raise ValueError('Not the same number of x- and y-coordinates')
         if not isinstance(lengths, tuple) or not isinstance(destinations, tuple):
             raise TypeError('Arguments should be given as tuples')
-
 
         # Object attributes
         self.lengths = np.array(lengths)
