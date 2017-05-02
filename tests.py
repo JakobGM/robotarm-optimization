@@ -4,7 +4,7 @@ import numpy as np
 from numpy import pi
 
 from robot_arm import RobotArm
-from robot_arm import objective, objective_gradient
+from robot_arm import objective, objective_gradient, constraint_gradient
 from plotting import path_figure, plot_position
 
 
@@ -95,13 +95,31 @@ class TestObjectiveGradientFunction(unittest.TestCase):
     def test_theta_size(self):
         self.assertEqual(self.thetas.shape, (2, 3))
 
-    def test_return_type(self):
-        self.assertIsInstance(objective(self.thetas), numbers.Number)
+    def test_return_size(self):
+        self.assertEqual(objective_gradient(self.thetas).shape, (2, 3))
 
     def test_correct_objective_gradient_value(self):
         objective_gradient_matrix = np.array(((-4, 1 / 2, 7 / 2,), (-3, 0, 3,),))
         np.testing.assert_equal(objective_gradient(self.thetas), objective_gradient_matrix)
 
+
+class TestConstraintGradientFunction(unittest.TestCase):
+    def setUp(self):
+        self.thetas = np.array(((0.5, 2, 3,), (4, 5, 6,),))
+        self.lengths = np.array((3, 2,))
+        self.constraint_set = np.arange(1, 13, dtype=int)
+
+    def test_theta_size(self):
+        self.assertEqual(self.thetas.shape, (2, 3))
+
+    def test_lengths_size(self):
+        self.assertEqual(len(self.lengths), 2)
+
+    def test_constraint_set_size(self):
+        self.assertEqual(len(self.constraint_set), 12)
+
+    def test_return_size(self):
+        self.assertEqual(objective_gradient(self.thetas).shape, (2, 3))
 
 class TestPlotting(unittest.TestCase):
     def setUp(self):
@@ -139,5 +157,3 @@ class TestPlotting(unittest.TestCase):
         # Assert that none of the arguments have been changed
         np.testing.assert_array_equal(original_destinations, self.robot_arm.destinations)
         np.testing.assert_array_equal(original_theta_matrix, self.theta_matrix)
-
-

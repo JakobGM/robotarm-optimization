@@ -13,6 +13,23 @@ def objective(thetas):
     return 0.5 * np.sum(deltas ** 2)
 
 
+def constraint(thetas, lengths, constraint_number):
+    n = len(lengths)
+    col_index = None
+    if constraint_number % 2 == 1:
+        col_index = (constraint_number + 1) // 2 - 1
+    elif constraint_number % 2 == 0:
+        col_index = constraint_number // 2 - 1
+    theta_cum_sum = np.cumsum(thetas[:, col_index])
+    constraint_value = 0
+    for i in range(n):
+        if constraint_number % 2 == 0:
+            constraint_value += lengths(i) * np.sin(theta_cum_sum[i])
+        elif constraint_number % 2 == 1:
+            constraint_value += lengths(i) * np.cos(theta_cum_sum[i])
+    return constraint_value
+
+
 def objective_gradient(thetas):
     assert isinstance(thetas, np.ndarray)
     n = thetas.shape[0]
@@ -33,22 +50,25 @@ def constraint_gradient(thetas, lengths, constraint_number):
     assert isinstance(thetas, np.ndarray)
     n = thetas.shape[0]
     s = thetas.shape[1]
+    col_index = None
     assert n == len(lengths)
     constraint_gradient_matrix = np.zeros((n, s))
-    if constraint_number % 2 == 0:
-        index = (constraint_number + 1) // 2 - 1
-    else:
-        index = constraint_number // 2
-    theta_cum_sum = np.cumsum(thetas[:, index])
-    theta_cum_prod = np.cumprod(thetas[:, index])
-    elements_in_outer_sum = np.zeros((n, n))
+    if constraint_number % 2 == 1:
+        col_index = (constraint_number + 1) // 2 - 1
+    elif constraint_number % 2 == 0:
+        col_index = constraint_number // 2 - 1
+    theta_cum_sum = np.cumsum(thetas[:, col_index])
+    theta_cum_prod = np.cumprod(thetas[:, col_index])
     for i in range(n):
+        elements_in_outer_sum = np.zeros(n)
         for j in range(n):
-            elements_in_outer_sum[j] = lengths[j] * theta_cum_sum[j] * np.sin(theta_cum_prod[j]) \
-                                          / thetas[j, index]
-        constraint_gradient_matrix[:, index] = -np.sum(elements_in_outer_sum[i:])
+            elements_in_outer_sum[j] = lengths[j] * theta_cum_sum[j] / thetas[i, col_index]
+            if constraint_number % 2 == 1:
+                elements_in_outer_sum[j] *= -np.sin(theta_cum_prod[j])
+            elif constraint_number % 2 == 0:
+                elements_in_outer_sum[j] *= np.cos(theta_cum_prod[j])
+        constraint_gradient_matrix[i, col_index] = -np.sum(elements_in_outer_sum[i:])
     return constraint_gradient_matrix
-
 
 
 class RobotArm:
