@@ -4,7 +4,7 @@ import numpy as np
 from numpy import pi
 
 from robot_arm import RobotArm
-from robot_arm import objective, objective_gradient, constraint_gradient
+from robot_arm import objective, objective_gradient, constraint_gradient, constraint, constraint_grad_set
 from plotting import path_figure, plot_position
 
 
@@ -119,6 +119,12 @@ class TestConstraintGradientFunction(unittest.TestCase):
 
     def test_return_size(self):
         self.assertEqual(objective_gradient(self.thetas).shape, (2, 3))
+
+class TestConstraintFunction():
+    pass
+
+class TestConstraintGradientSet():
+    pass
 
 class TestPlotting(unittest.TestCase):
     def setUp(self):
