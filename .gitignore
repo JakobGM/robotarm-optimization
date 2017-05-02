@@ -10,3 +10,6 @@ __pycache__/
 
 # Rope package for python autocomplete
 .ropeproject
+
+# Jetbrains project folder
+.idea
