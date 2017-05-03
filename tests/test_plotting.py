@@ -24,7 +24,7 @@ class TestPlotting(unittest.TestCase):
         self.theta_matrix = np.arange(total_joints).reshape((n, s))
 
     def test_path_figure_return(self):
-        return_value = path_figure(self.theta_matrix, self.robot_arm)
+        return_value = path_figure(self.theta_matrix, self.robot_arm, show=False)
         self.assertEqual(return_value, None)
 
     def test_plot_pure_functon(self):
@@ -33,7 +33,7 @@ class TestPlotting(unittest.TestCase):
         original_theta_matrix = self.theta_matrix.copy()
 
         # Run the pure function
-        path_figure(self.theta_matrix, self.robot_arm)
+        path_figure(self.theta_matrix, self.robot_arm, show=False)
 
         # Assert that none of the arguments have been changed
         np.testing.assert_array_equal(original_destinations, self.robot_arm.destinations)

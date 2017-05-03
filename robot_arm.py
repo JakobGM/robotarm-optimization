@@ -49,19 +49,22 @@ class RobotArm:
     def path(self, value):
         self._path = value
 
-    def move_to_destination(self):
+    def calculate_joint_angles(self, p, theta):
+        '''
+        Takes in a destination p and an initial guess theta and returns a
+        theta which maps closely to the point theta
+        '''
         # Check if the goal is out of reach
-        p_length = np.linalg.norm(self.p)
+        p_length = np.linalg.norm(p)
 
         if p_length >= self.reach:
             print("Point outside interior of configuration space. Minimum found analytically.")
-            self.move_closest_to_out_of_reach()
+            return self.move_closest_to_out_of_reach(p)
         elif self.annulus and p_length <= self.inner_reach:
             print("Point outside interior of configuration space. Minimum found analytically.")
-            self.move_closest_to_out_of_reach(internal=True)
+            return self.move_closest_to_out_of_reach(p, internal=True)
         else:
-            raise NotImpelmentedError
-            BFGS(self.theta, self.f, self.gradient, self.precision)
+            return BFGS(theta, self.f, self.gradient, self.precision)
 
     @property
     def theta(self):
@@ -79,8 +82,8 @@ class RobotArm:
         self.theta = new_theta
         self.path = np.column_stack((self.path, self.theta))
 
-    def move_closest_to_out_of_reach(self, internal=False):
-        angle = np.math.atan2(self.p[1], self.p[0])
+    def move_closest_to_out_of_reach(self, p, internal=False):
+        angle = np.math.atan2(p[1], p[0])
         theta = np.zeros(self.n)
         theta[0] = angle
         if internal is True:
@@ -88,7 +91,7 @@ class RobotArm:
             theta[self.longest] += np.pi
             if self.longest < self.n - 1:
                 theta[self.longest + 1] += np.pi
-        self.move_to(theta)
+        return theta
 
     def joint_positions(self, theta):
         '''
