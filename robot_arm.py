@@ -44,12 +44,22 @@ class RobotArm:
             self.inner_reach = 0
 
 
-    def generate_initial_guess(self, show=False):
-        # Calculate initial guesses for joint angles
+    def generate_initial_guess(self, show=False, first_configuration=None):
+        # How should the arm be positioned before generating a valid
+        # configuration which moves the arm to the first destination
+        if first_configuration is None:
+            last_theta = self.theta
+        else:
+            assert first_configuration.shape == (self.n,)
+            last_theta = first_configuration
+
+        # Calculate initial guess for joint angles which hit all the
+        # destinations but not necessarily with little effort
         self.initial_guess = np.empty((self.n, self.s,))
         assert self.initial_guess.shape == (self.n, self.s,)
         for index, destination in enumerate(self.destinations.T):
-            self.initial_guess[:, index] = self.calculate_joint_angles(destination)
+            last_theta = self.calculate_joint_angles(destination, last_theta)
+            self.initial_guess[:, index] = last_theta
 
         fig = path_figure(self.initial_guess, self, show=False)
         fig.suptitle('Initial guess calculated by BFGS')
