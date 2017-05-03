@@ -33,7 +33,7 @@ class TestPlotting(unittest.TestCase):
         original_theta_matrix = self.theta_matrix.copy()
 
         # Run the pure function
-        path_figure(self.theta_matrix, self.robot_arm, show=False)
+        path_figure(self.theta_matrix, self.robot_arm, show=True)
 
         # Assert that none of the arguments have been changed
         np.testing.assert_array_equal(original_destinations, self.robot_arm.destinations)

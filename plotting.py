@@ -33,6 +33,8 @@ def path_figure(theta_matrix, robot_arm, show=True):
     if show is True:
         plt.show()
 
+    return fig
+
 
 def set_axis_options(ax, robot_arm):
     ax.set_autoscale_on(False)

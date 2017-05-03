@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import ImageMagickWriter
 from methods import BFGS
+from plotting import path_figure
 
 
 class RobotArm:
@@ -22,6 +23,7 @@ class RobotArm:
         self.n = len(lengths)
         self.destinations = np.array(destinations)
         self.destinations.setflags(write=False)
+        self.s = self.destinations.shape[1]
         self.precision = precision
 
         if theta is None:
@@ -29,7 +31,7 @@ class RobotArm:
         else:
             if not isinstance(theta, tuple):
                 raise TypeError('Theta should be given as a tuple')
-            self._theta = theta
+            self._theta = np.array(theta)
 
         self._path = self.theta
 
@@ -41,6 +43,20 @@ class RobotArm:
         else:
             self.inner_reach = 0
 
+
+    def generate_initial_guess(self, show=False):
+        # Calculate initial guesses for joint angles
+        self.initial_guess = np.empty((self.n, self.s,))
+        assert self.initial_guess.shape == (self.n, self.s,)
+        for index, destination in enumerate(self.destinations.T):
+            self.initial_guess[:, index] = self.calculate_joint_angles(destination)
+
+        print(self.initial_guess)
+        fig = path_figure(self.initial_guess, self, show=False)
+        fig.suptitle('Initial guess calculated by BFGS')
+        if show is True:
+            plt.show()
+
     @property
     def path(self):
         return self._path
@@ -49,11 +65,16 @@ class RobotArm:
     def path(self, value):
         self._path = value
 
-    def calculate_joint_angles(self, p, theta):
+    def calculate_joint_angles(self, p, theta=None):
         '''
         Takes in a destination p and an initial guess theta and returns a
         theta which maps closely to the point theta
         '''
+        # If theta is not provided, use the zero as initial guess
+        if theta is None:
+            theta = np.zeros(self.n)
+        assert theta.ndim == 1
+
         # Check if the goal is out of reach
         p_length = np.linalg.norm(p)
 
@@ -64,7 +85,9 @@ class RobotArm:
             print("Point outside interior of configuration space. Minimum found analytically.")
             return self.move_closest_to_out_of_reach(p, internal=True)
         else:
-            return BFGS(theta, self.f, self.gradient, self.precision)
+            f = self.generate_f(p)
+            gradient = self.generate_gradient(p)
+            return BFGS(theta, f, gradient, self.precision)
 
     @property
     def theta(self):
@@ -105,35 +128,37 @@ class RobotArm:
         components = normalized_components * self.lengths.transpose()
         return np.cumsum(components, axis=1).reshape((2, self.n))
 
-    def position(self, joints=False):
+    def position(self, theta):
         # The effective angles of each joint relative to x-axis
-        joint_angles = np.cumsum(self.theta)
+        joint_angles = np.cumsum(theta)
 
         # Components of each joint vector
         normalized_components = np.array([np.cos(joint_angles), np.sin(joint_angles)]).reshape((2, self.n))
         components = normalized_components * self.lengths.transpose()
 
-        if joints is True:
-            return np.cumsum(components, axis=1).reshape((2, self.n))
-        else:
-            return np.sum(components, axis=1).reshape((2,))
+        return np.sum(components, axis=1).reshape((2,))
 
-    def remaining_distance(self):
-        return np.linalg.norm(self.position() - self.p) ** 2 / 2
+    def generate_f(self, p):
+        def f(theta):
+            return np.linalg.norm(self.position(theta) - p) ** 2 / 2
+        return f
 
-    def _gradient(self):
-        joint_angles = np.cumsum(self.theta)
-        x_components = self.lengths * np.cos(joint_angles)
-        y_components = self.lengths * np.sin(joint_angles)
+    def generate_gradient(self, p):
+        def gradient(theta):
+            joint_angles = np.cumsum(theta)
+            x_components = self.lengths * np.cos(joint_angles)
+            y_components = self.lengths * np.sin(joint_angles)
 
-        def a(i): return np.sum(x_components[i:], dtype=np.float)
+            def a(i): return np.sum(x_components[i:], dtype=np.float)
 
-        def b(i): return np.sum(y_components[i:], dtype=np.float)
+            def b(i): return np.sum(y_components[i:], dtype=np.float)
 
-        def f_partial_derivative(k):
-            return np.float(-b(k) * (a(0) - self.p[0]) + a(k) * (b(0) - self.p[1]))
+            def f_partial_derivative(k):
+                return np.float(-b(k) * (a(0) - p[0]) + a(k) * (b(0) - p[1]))
 
-        return np.array([f_partial_derivative(k) for k in np.arange(0, self.n)], dtype=np.float)
+            return np.array([f_partial_derivative(k) for k in np.arange(0, self.n)], dtype=np.float)
+
+        return gradient
 
     def _hessian(self):
         joint_angles = np.cumsum(self.theta)
@@ -162,10 +187,6 @@ class RobotArm:
         else:
             self.theta = theta
             return self.remaining_distance()
-
-    def gradient(self, theta):
-        self.theta = theta
-        return self._gradient()
 
     def hessian(self, theta):
         self.theta = theta
@@ -213,3 +234,14 @@ class RobotArm:
         plt.title('Convergence plot')
 
         plt.show()
+
+
+if __name__ == '__main__':
+    lengths = (3, 2, 2,)
+    destinations = (
+        (5, 4, 6, 4, 5),
+        (0, 2, 0.5, -2, -1),
+    )
+    theta = (np.pi, np.pi / 2, 0,)
+    robot_arm = RobotArm(lengths, destinations, theta)
+    robot_arm.generate_initial_guess(show=True)
