@@ -16,8 +16,8 @@ def gradient_descent(x0, f, grad_f, epsilon, alpha0=1, c1=1e-4, rho=0.5):
         alpha = armijo_backtracking_line_search(x, p, f, grad, alpha0, c1, rho)
         x += alpha * p + np.random.uniform(low=-1e-1, high=1e-1, size=len(x0))
 
-        if it % 100 == 0:
-            f(x, save=True)
+        # if it % 100 == 0:
+        #     f(x, save=True)
 
         grad = grad_f(x)
         norm_of_grad = np.linalg.norm(grad)
@@ -82,7 +82,7 @@ def BFGS(x0, f, grad_f, epsilon, alpha_steps=20, c1=1e-4, c2=0.9):
 
             # Update values
             x_k_1 = x_k + alpha * p_k
-            f(x_k_1, save=True)
+            # f(x_k_1, save=True)
             grad_k_1 = grad_f(x_k_1)
 
             s_k = x_k_1 - x_k

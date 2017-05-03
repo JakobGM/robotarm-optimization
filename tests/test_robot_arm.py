@@ -13,6 +13,7 @@ class TestRobotArm(unittest.TestCase):
             (0, 2, 0.5, -2, -1),
         )
         self.theta = (pi, pi / 2, 0,)
+        self.robot_arm = RobotArm(self.lengths, self.destinations, self.theta)
 
     def test_init_all_arguments(self):
         RobotArm(self.lengths, self.destinations, self.theta)
@@ -60,4 +61,5 @@ class TestRobotArm(unittest.TestCase):
             0,
         )
 
-
+    def test_generate_initial_guess(self):
+        self.robot_arm.generate_initial_guess()
