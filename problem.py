@@ -19,16 +19,15 @@ def constraint(thetas, lengths, constraint_number, coordinate):
     constraint_value = 0
     for i in range(n):
         if constraint_number % 2 == 0:
-            constraint_value += lengths(i) * np.sin(theta_cum_sum[i])
+            constraint_value += lengths[i] * np.sin(theta_cum_sum[i])
         elif constraint_number % 2 == 1:
-            constraint_value += lengths(i) * np.cos(theta_cum_sum[i])
+            constraint_value += lengths[i] * np.cos(theta_cum_sum[i])
     return constraint_value - coordinate
 
 
 def objective_gradient(thetas):
     assert isinstance(thetas, np.ndarray)
-    n = thetas.shape[0]
-    s = thetas.shape[1]
+    n, s = thetas.shape
     objective_gradient_matrix = np.zeros((n, s))
     for j in range(s):
         for i in range(n):
@@ -43,8 +42,7 @@ def objective_gradient(thetas):
 
 def constraint_gradient(thetas, lengths, constraint_number):
     assert isinstance(thetas, np.ndarray)
-    n = thetas.shape[0]
-    s = thetas.shape[1]
+    n, s = thetas.shape
     col_index = None
     assert n == len(lengths)
     constraint_gradient_matrix = np.zeros((n, s))
@@ -65,8 +63,7 @@ def constraint_gradient(thetas, lengths, constraint_number):
 
 
 def constraint_squared_gradient(thetas, lengths, constraint_number):
-    n = thetas.shape[0]
-    s = thetas.shape[1]
+    n, s = thetas.shape
     col_index = None
     assert n == len(lengths)
     constraint_gradient_matrix = np.zeros((n, s))
@@ -86,26 +83,38 @@ def constraint_squared_gradient(thetas, lengths, constraint_number):
                         final_sum[row_index] += - l_prod * np.cos(theta_cum_sum[i]) * np.sin(partial_theta_sum)
                     elif j < row_index <= i:
                         final_sum[row_index] += - l_prod * np.sin(partial_theta_sum) * np.cos(theta_cum_sum[j])
-                    elif i == j >= row_index:
+                    elif i >= row_index and j >= row_index:
                         final_sum[row_index] += - l_prod * (np.sin(theta_cum_sum[i]) * np.cos(theta_cum_sum[j]) +
-                                                            np.cos(theta_cum_sum[i]) + np.sin(theta_cum_sum[j]))
+                                                            np.cos(theta_cum_sum[i]) * np.sin(theta_cum_sum[j]))
                 elif constraint_number % 2 == 0:
                     if i < row_index <= j:
                         final_sum[row_index] += l_prod * np.sin(theta_cum_sum[i]) * np.cos(partial_theta_sum)
                     elif j < row_index <= i:
                         final_sum[row_index] += l_prod * np.cos(partial_theta_sum) * np.sin(theta_cum_sum[j])
-                    elif i == j >= row_index:
+                    elif i >= row_index and j >= row_index:
                         final_sum[row_index] += l_prod * (np.cos(theta_cum_sum[i]) * np.sin(theta_cum_sum[j]) +
-                                                          np.sin(theta_cum_sum[i]) + np.cos(theta_cum_sum[j]))
+                                                          np.sin(theta_cum_sum[i]) * np.cos(theta_cum_sum[j]))
     constraint_gradient_matrix[:, col_index] = final_sum
     return constraint_gradient_matrix
 
 
 def constraint_grad_set(thetas, lengths):
-    n = thetas.shape[0]
-    s = thetas.shape[1]
+    n, s = thetas.shape
     constraint_set = np.zeros((n * s, 2 * s))
     for i in range(1, 2 * s + 1):
         constraint_grad = constraint_gradient(thetas, lengths, i).flatten('F').reshape((n * s,))
         constraint_set[:, i - 1] = constraint_grad
+    return constraint_set
+
+
+def get_constraint_set(thetas, lengths, coordinates):
+    n, s = thetas.shape
+    constraint_set = np.zeros((2, s))
+    for i in range(1, 2 * s + 1):
+        if i % 2 == 0:
+            col_index = i//2 - 1
+            constraint_set[1, col_index] = constraint(thetas, lengths, i, coordinates[1, col_index])
+        elif i % 2 == 1:
+            col_index = (i+1)//2 - 1
+            constraint_set[0, col_index] = constraint(thetas, lengths, i, coordinates[0, col_index])
     return constraint_set
