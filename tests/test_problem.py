@@ -1,7 +1,8 @@
 import unittest
 import numbers
 import numpy as np
-from problem import objective, objective_gradient
+from problem import (objective, objective_gradient, constraint, constraint_gradient,
+                     constraint_squared_gradient, constraint_grad_set)
 
 class TestObjectiveFunction(unittest.TestCase):
     def setUp(self):
@@ -21,6 +22,17 @@ class TestObjectiveFunction(unittest.TestCase):
         original = self.thetas
         objective(self.thetas)
         np.testing.assert_equal(original, self.thetas)
+
+class TestConstraintFunction(unittest.TestCase):
+    def setUp(self):
+        self.thetas = np.array(((0.5, 2, 3,), (4, 5, 6,),))
+        self.lengths = np.array((3, 2,))
+        self.constraint_set = np.arange(1, 13, dtype=int)
+        self.coordinates = np.array((3, 1, 4), (1, 2, 3))
+
+    def test_constraint_value(self):
+        self.assertEqual(constraint(self.thetas, self.lengths, self.constraint_set[0]),)
+
 
 
 class TestObjectiveGradientFunction(unittest.TestCase):
@@ -58,9 +70,8 @@ class TestConstraintGradientFunction(unittest.TestCase):
         self.assertEqual(objective_gradient(self.thetas).shape, (2, 3))
 
 
-class TestConstraintFunction():
+class TestConstraintSquaredGradientFunction():
     pass
-
 
 class TestConstraintGradientSet():
     pass
