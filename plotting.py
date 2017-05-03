@@ -59,8 +59,9 @@ def plot_position(axis, theta, robot_arm):
     axis.plot(x, y, '-o')
 
     # Plot all the points that shall be reached
-    for p in robot_arm.destinations.T:
-        axis.plot(p[0], p[1], 'x')
+    for index, p in enumerate(robot_arm.destinations.T):
+        point, = axis.plot(p[0], p[1], 'x')
+        axis.text(p[0], p[1], str(index + 1), fontsize=14, color=point.get_color())
 
     # Plot configuration space of robot
     configuration_space = Wedge(
