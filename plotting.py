@@ -3,7 +3,7 @@ from matplotlib.patches import Wedge
 import numpy as np
 
 
-def path_figure(theta_matrix, robot_arm):
+def path_figure(theta_matrix, robot_arm, show=True):
     """
     Arguments:
     theta_matrix - A set of theta column vectors
@@ -29,6 +29,9 @@ def path_figure(theta_matrix, robot_arm):
     # Plotting content of each subplot
     for index, theta in enumerate(theta_matrix.T):
         plot_position(axes[index], theta, robot_arm)
+
+    if show is True:
+        plt.show()
 
 
 def set_axis_options(ax, robot_arm):
