@@ -51,7 +51,6 @@ class RobotArm:
         for index, destination in enumerate(self.destinations.T):
             self.initial_guess[:, index] = self.calculate_joint_angles(destination)
 
-        print(self.initial_guess)
         fig = path_figure(self.initial_guess, self, show=False)
         fig.suptitle('Initial guess calculated by BFGS')
         if show is True:
@@ -121,7 +120,7 @@ class RobotArm:
         Given a theta vector, this returns where the joints will be located.
         '''
         # The effective angles of each joint relative to x-axis
-        joint_angles = np.cumsum(self.theta)
+        joint_angles = np.cumsum(theta)
 
         # Components of each joint vector
         normalized_components = np.array([np.cos(joint_angles), np.sin(joint_angles)]).reshape((2, self.n))
