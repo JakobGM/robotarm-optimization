@@ -18,7 +18,7 @@ def augmented_lagrangian_method(initial_penalty, initial_tolerance, initial_thet
         l_grad_c_sum = 0
         grad_c_sq_sum = 0
         for i in range(1, 2 * s + 1):
-            current_constraint = constraint(current_thetas, lengths, i, coordinates)
+            current_constraint = constraint(current_thetas, lengths, i, coordinates[i-1])
             current_constraint_grad = constraint_gradient(current_thetas, lengths, i)
             current_constraint_sq_grad = constraint_squared_gradient(current_thetas, lengths, i)
             l_c_sum += current_lambdas[i - 1] * current_constraint
@@ -27,12 +27,15 @@ def augmented_lagrangian_method(initial_penalty, initial_tolerance, initial_thet
             grad_c_sq_sum += current_constraint_sq_grad
 
         def augmented_lagrangian(func1_thetas):
-            return objective(func1_thetas) - l_c_sum + current_penalty / 2 * c_sq_sum
+            return objective(func1_thetas.reshape((n, s))) - l_c_sum + current_penalty / 2 * c_sq_sum
 
         def grad_augmented_lagrangian(func2_thetas):
-            return objective_gradient(func2_thetas) - l_grad_c_sum + current_penalty / 2 * grad_c_sq_sum
+            grad_aug_lag = objective_gradient(
+                func2_thetas.reshape((n, s))) - l_grad_c_sum + current_penalty / 2 * grad_c_sq_sum
+            return grad_aug_lag.flatten('F')
 
-        current_thetas = BFGS(current_thetas, augmented_lagrangian, grad_augmented_lagrangian, current_tolerance)
+        current_thetas = BFGS(current_thetas.flatten('F'), augmented_lagrangian,
+                              grad_augmented_lagrangian, current_tolerance).reshape((n, s))
 
         if np.linalg.norm(get_constraint_set(current_thetas, lengths, coordinates)) < global_tolerance:
             return current_thetas
