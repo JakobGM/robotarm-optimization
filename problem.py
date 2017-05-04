@@ -1,4 +1,11 @@
+"""
+Functions which will be used in optimization methods.
+The 'thetas' argument will always be an n times s 2-d numpy array.
+If you need this ta be a vector instead, take in the matrix and
+perform thetas.reshape(n*s, 1) instead.
+"""
 import numpy as np
+import functools
 
 
 def objective(thetas):
@@ -118,3 +125,19 @@ def get_constraint_set(thetas, lengths, coordinates):
             col_index = (i+1)//2 - 1
             constraint_set[0, col_index] = constraint(thetas, lengths, i, coordinates[0, col_index])
     return constraint_set
+
+def generate_quadratically_penealized_objective(robot_arm):
+    '''
+    Given a RobotArm object with a valid joint lenghts and destinations
+    this function returns a quadratically penalized objective function
+    taking in two parameters: theta and mu
+    '''
+    constraints = functools.partial(
+        get_constraint_set,
+        lengths=robot_arm.lengths,
+        coordinates=robot_arm.destinations
+    )
+    def quadratically_penealized_objective(thetas, mu):
+        return objective(thetas) + 0.5 * mu * np.sum(constraints**2)
+
+    return quadratically_penealized_objective
