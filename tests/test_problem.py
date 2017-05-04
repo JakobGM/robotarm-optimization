@@ -1,8 +1,11 @@
 import unittest
 import numbers
 import numpy as np
-from problem import (objective, objective_gradient, constraint, constraint_gradient,
-                     constraint_squared_gradient, constraint_grad_set)
+from problem import (objective, objective_gradient,
+                     constraint, constraint_gradient, constraint_squared_gradient, constraint_grad_set,
+                     generate_quadratically_penealized_objective,
+                     generate_quadratically_penalized_objective_gradient,)
+from robot_arm import RobotArm
 
 
 class TestObjectiveFunction(unittest.TestCase):
@@ -136,3 +139,19 @@ class TestConstraintGradientSet(unittest.TestCase):
 
     def test_set_size(self):
         self.assertEqual(constraint_grad_set(self.thetas, self.lengths).shape, (6, 6))
+
+class TestGeneratorFunctions(unittest.TestCase):
+    def setUp(self):
+        lengths = (3, 2, 2,)
+        destinations = (
+            (5, 4, 6, 4, 5),
+            (0, 2, 0.5, -2, -1),
+        )
+        theta = (np.pi, np.pi / 2, 0,)
+        self.robot_arm = RobotArm(lengths, destinations, theta)
+
+    def test_penalized_objective_generator_invocation(self):
+        quad_func = generate_quadratically_penealized_objective(self.robot_arm)
+
+    def test_penalized_objective_gradient_generator_invocation(self):
+        quad_gradient_func = generate_quadratically_penalized_objective_gradient(self.robot_arm)
