@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import ImageMagickWriter
 from methods import BFGS
 from plotting import path_figure
+from problem import generate_quadratically_penealized_objective
 
 
 class RobotArm:
@@ -65,6 +66,10 @@ class RobotArm:
         fig.suptitle('Initial guess calculated by BFGS')
         if show is True:
             plt.show()
+
+    def calculate_optimal_path(self, show=False):
+        penalized_objective = generate_quadratically_penealized_objective(self)
+        raise NotImplementedError
 
     @property
     def path(self):
