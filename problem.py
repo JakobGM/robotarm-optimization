@@ -141,3 +141,20 @@ def generate_quadratically_penealized_objective(robot_arm):
         return objective(thetas) + 0.5 * mu * np.sum(constraints(thetas)**2)
 
     return quadratically_penealized_objective
+
+def generate_quadratically_penalized_objective_gradient(robot_arm):
+    s = robot_arm.s
+    contraint_funcs = [
+        functools(
+            func=constraint_squared_gradient,
+            lengths=robot_arm.lengths,
+            constraint_number=i)
+        for i in 2 * s
+    ]
+    def quadratically_penalized_objective_gradient(thetas, mu):
+        grad = objective_gradient(thetas).flatten('F')
+        for constraint_number in range(2*s):
+            grad += 0.5 * mu * constraint_funcs[constraint_number](thetas).flatten('F')
+        return grad
+
+    return quadratically_penalized_objective_gradient
