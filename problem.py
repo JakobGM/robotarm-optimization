@@ -149,7 +149,7 @@ def generate_quadratically_penalized_objective_gradient(robot_arm):
             func=constraint_squared_gradient,
             lengths=robot_arm.lengths,
             constraint_number=i)
-        for i in 2 * s
+        for i in range(2 * s)
     ]
     def quadratically_penalized_objective_gradient(thetas, mu):
         grad = objective_gradient(thetas).flatten('F')
