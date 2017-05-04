@@ -124,7 +124,7 @@ def get_constraint_set(thetas, lengths, coordinates):
         elif i % 2 == 1:
             col_index = (i+1)//2 - 1
             constraint_set[0, col_index] = constraint(thetas, lengths, i, coordinates[0, col_index])
-    return constraint_set
+    return constraint_set.reshape((2*s,))
 
 def generate_quadratically_penealized_objective(robot_arm):
     '''
@@ -138,6 +138,6 @@ def generate_quadratically_penealized_objective(robot_arm):
         coordinates=robot_arm.destinations
     )
     def quadratically_penealized_objective(thetas, mu):
-        return objective(thetas) + 0.5 * mu * np.sum(constraints**2)
+        return objective(thetas) + 0.5 * mu * np.sum(constraints(thetas)**2)
 
     return quadratically_penealized_objective
