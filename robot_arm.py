@@ -5,7 +5,7 @@ from matplotlib.animation import ImageMagickWriter
 import plotting
 from methods import BFGS
 from plotting import path_figure
-from problem import generate_quadratically_penalized_objective
+from quadratic_penalty import generate_quadratically_penalized_objective
 
 
 class RobotArm:
