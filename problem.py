@@ -5,9 +5,9 @@ If you need this ta be a vector instead, take in the matrix and
 perform thetas.reshape(n*s, 1) instead.
 """
 import numpy as np
-import functools
 
 from constraints import generate_constraints_function
+
 
 def objective(thetas):
     assert isinstance(thetas, np.ndarray)
@@ -120,12 +120,13 @@ def get_constraint_set(thetas, lengths, coordinates):
     constraint_set = np.zeros((2, s))
     for i in range(1, 2 * s + 1):
         if i % 2 == 0:
-            col_index = i//2 - 1
+            col_index = i // 2 - 1
             constraint_set[1, col_index] = constraint(thetas, lengths, i, coordinates[1, col_index])
         elif i % 2 == 1:
-            col_index = (i+1)//2 - 1
+            col_index = (i + 1) // 2 - 1
             constraint_set[0, col_index] = constraint(thetas, lengths, i, coordinates[0, col_index])
-    return constraint_set.reshape((2*s,))
+    return constraint_set.reshape((2 * s,))
+
 
 def generate_quadratically_penealized_objective(robot_arm):
     '''
@@ -139,14 +140,15 @@ def generate_quadratically_penealized_objective(robot_arm):
     constraints_func = generate_constraints_function(robot_arm)
 
     def quadratically_penealized_objective(thetas, mu):
-        if not thetas.shape == (n*s,):
+        if not thetas.shape == (n * s,):
             raise ValueError('Thetas is not given as 1D-vector, but as: ' + \
                              str(thetas.shape))
 
         return objective(thetas) + \
-            0.5 * mu * np.sum(constraints_func(thetas)**2)
+               0.5 * mu * np.sum(constraints_func(thetas) ** 2)
 
     return quadratically_penealized_objective
+
 
 def generate_quadratically_penalized_objective_gradient(robot_arm):
     n = robot_arm.n
@@ -155,7 +157,7 @@ def generate_quadratically_penalized_objective_gradient(robot_arm):
 
     def quadratically_penalized_objective_gradient(thetas, mu):
         grad = objective_gradient(thetas).flatten('F')
-        for constraint_number in range(2*s):
+        for constraint_number in range(2 * s):
             grad += 0.5 * mu * constraints_func[constraint_number](thetas).flatten('F')
         return grad
 
