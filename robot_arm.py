@@ -1,7 +1,8 @@
-import plotting
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.animation import ImageMagickWriter
+
+import plotting
 from methods import BFGS
 from plotting import path_figure
 from problem import generate_quadratically_penealized_objective
@@ -43,7 +44,6 @@ class RobotArm:
             self.inner_reach = self.lengths[self.longest] - np.sum(np.delete(self.lengths, self.longest))
         else:
             self.inner_reach = 0
-
 
     def generate_initial_guess(self, show=False, first_configuration=None):
         # How should the arm be positioned before generating a valid
@@ -158,6 +158,7 @@ class RobotArm:
     def generate_f(self, p):
         def f(theta):
             return np.linalg.norm(self.position(theta) - p) ** 2 / 2
+
         return f
 
     def generate_gradient(self, p):

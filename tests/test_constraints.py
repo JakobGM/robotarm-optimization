@@ -1,9 +1,11 @@
-import numpy as np
 import unittest
 
+import numpy as np
+
 from constraints import (generate_constraints_function,
-                         generate_constraint_gradients_function,)
+                         generate_constraint_gradients_function, )
 from robot_arm import RobotArm
+
 
 class TestConstraintFunctions(unittest.TestCase):
     def setUp(self):
@@ -20,9 +22,9 @@ class TestConstraintFunctions(unittest.TestCase):
 
     def test_constraints_func_return_type(self):
         constraints = self.constraints_func(self.thetas)
-        self.assertEqual(constraints.shape, (2*5,))
+        self.assertEqual(constraints.shape, (2 * 5,))
 
     def test_constraint_gradients_func_return_type(self):
         constraint_gradients = self.constraint_gradients_func(self.thetas)
-        self.assertEqual(constraint_gradients.shape, (3*5, 2*5))
-        #print(np.array2string(constraint_gradients, max_line_width=np.inf))
+        self.assertEqual(constraint_gradients.shape, (3 * 5, 2 * 5))
+        # print(np.array2string(constraint_gradients, max_line_width=np.inf))
