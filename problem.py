@@ -35,7 +35,7 @@ def generate_objective_gradient_function(robot_arm):
         else:
             thetas = thetas.reshape((n, s), order='F')
 
-        def roll(x, y): np.roll(x.copy(), shift=y, axis=1)
+        def roll(x, y): return np.roll(x.copy(), shift=y, axis=1)
 
         return (2*thetas - roll(thetas, -1) - roll(thetas, 1)).reshape((n*s,), order='F')
 
