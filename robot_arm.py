@@ -143,6 +143,9 @@ class RobotArm:
         return np.cumsum(components, axis=1).reshape((2, self.n))
 
     def position(self, theta):
+        if not theta.shape == (self.n,):
+            raise ValueError('RobotArm got wrong dimensions of theta: ' + str(theta.shape))
+
         # The effective angles of each joint relative to x-axis
         joint_angles = np.cumsum(theta)
 

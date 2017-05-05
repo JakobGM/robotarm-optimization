@@ -7,6 +7,7 @@ perform thetas.reshape(n*s, 1) instead.
 import numpy as np
 import functools
 
+from constraints import generate_constraints_function
 
 def objective(thetas):
     assert isinstance(thetas, np.ndarray)
@@ -130,31 +131,32 @@ def generate_quadratically_penealized_objective(robot_arm):
     '''
     Given a RobotArm object with a valid joint lenghts and destinations
     this function returns a quadratically penalized objective function
-    taking in two parameters: theta and mu
+    taking in two parameters: thetas and mu
+    Function: R^(ns) x R --> R
     '''
-    constraints = functools.partial(
-        get_constraint_set,
-        lengths=robot_arm.lengths,
-        coordinates=robot_arm.destinations
-    )
+    n = robot_arm.n
+    s = robot_arm.s
+    constraints_func = generate_constraints_function(robot_arm)
+
     def quadratically_penealized_objective(thetas, mu):
-        return objective(thetas) + 0.5 * mu * np.sum(constraints(thetas)**2)
+        if not thetas.shape == (n*s,):
+            raise ValueError('Thetas is not given as 1D-vector, but as: ' + \
+                             str(thetas.shape))
+
+        return objective(thetas) + \
+            0.5 * mu * np.sum(constraints_func(thetas)**2)
 
     return quadratically_penealized_objective
 
 def generate_quadratically_penalized_objective_gradient(robot_arm):
+    n = robot_arm.n
     s = robot_arm.s
-    contraint_funcs = [
-        functools(
-            func=constraint_squared_gradient,
-            lengths=robot_arm.lengths,
-            constraint_number=i)
-        for i in range(2 * s)
-    ]
+    constraints_func = generate_constraints_function(robot_arm)
+
     def quadratically_penalized_objective_gradient(thetas, mu):
         grad = objective_gradient(thetas).flatten('F')
         for constraint_number in range(2*s):
-            grad += 0.5 * mu * constraint_funcs[constraint_number](thetas).flatten('F')
+            grad += 0.5 * mu * constraints_func[constraint_number](thetas).flatten('F')
         return grad
 
     return quadratically_penalized_objective_gradient
