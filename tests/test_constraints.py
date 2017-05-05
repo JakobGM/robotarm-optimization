@@ -28,3 +28,8 @@ class TestConstraintFunctions(unittest.TestCase):
         constraint_gradients = self.constraint_gradients_func(self.thetas)
         self.assertEqual(constraint_gradients.shape, (3 * 5, 2 * 5))
         # print(np.array2string(constraint_gradients, max_line_width=np.inf))
+
+    def test_licq(self):
+        constraint_gradients = self.constraint_gradients_func(self.thetas)
+        rank = np.linalg.matrix_rank(constraint_gradients)
+        self.assertEqual(rank, 2 * 5)
