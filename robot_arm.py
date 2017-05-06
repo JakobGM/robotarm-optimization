@@ -67,6 +67,8 @@ class RobotArm:
         if show is True:
             plt.show()
 
+        return self.initial_guess.reshape((self.n * self.s,), order='F')
+
     def calculate_optimal_path(self, show=False):
         penalized_objective = generate_quadratically_penealized_objective(self)
         raise NotImplementedError
@@ -82,7 +84,7 @@ class RobotArm:
     def calculate_joint_angles(self, p, theta=None):
         '''
         Takes in a destination p and an initial guess theta and returns a
-        theta which maps closely to the point theta
+        theta which maps closely to the point p
         '''
         # If theta is not provided, use the zero as initial guess
         if theta is None:
@@ -101,7 +103,7 @@ class RobotArm:
         else:
             f = self.generate_f(p)
             gradient = self.generate_gradient(p)
-            return BFGS(theta, f, gradient, self.precision)
+            return BFGS(theta, f, gradient, self.precision, initial_guess=True)
 
     @property
     def theta(self):

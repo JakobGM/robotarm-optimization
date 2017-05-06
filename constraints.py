@@ -36,7 +36,7 @@ def generate_constraint_gradients_function(robot_arm):
         if not thetas.shape == (n * s,):
             raise ValueError('Thetas is not given as 1D vector')
 
-        joint_angles = np.cumsum(thetas.reshape((n, s)), axis=0)
+        joint_angles = np.cumsum(thetas.reshape((n, s), order='F'), axis=0)
         assert joint_angles.shape == (n, s,)
         x_components = robot_arm.lengths.reshape(n, 1) * np.cos(joint_angles)
         y_components = robot_arm.lengths.reshape(n, 1) * np.sin(joint_angles)
