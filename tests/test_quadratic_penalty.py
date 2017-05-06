@@ -30,4 +30,4 @@ class TestGeneratorFunctions(unittest.TestCase):
 
     def test_quadratic_penalty_method(self):
         thetas = quadratic_penalty_method(self.robot_arm)
-        path_figure(thetas.reshape((self.n, self.s,), order='F'), self.robot_arm, show=True)
+        path_figure(thetas.reshape((self.n, self.s,), order='F'), self.robot_arm, show=False)
