@@ -11,7 +11,7 @@ def gradient_descent(x0, f, grad_f, epsilon, alpha0=1, c1=1e-4, rho=0.5):
 
     it = 0
     max_it = 1e5
-    while f(x) > epsilon:
+    while norm_of_grad > epsilon:
         p = - grad / norm_of_grad
         alpha = armijo_backtracking_line_search(x, p, f, grad, alpha0, c1, rho)
         x += alpha * p + np.random.uniform(low=-1e-1, high=1e-1, size=len(x0))
