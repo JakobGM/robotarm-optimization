@@ -1,7 +1,8 @@
 import unittest
+from numpy import testing
 import numbers
 import numpy as np
-from problem import generate_objective_function
+from problem import generate_objective_function, generate_objective_gradient_function
 from robot_arm import RobotArm
 
 
@@ -24,6 +25,21 @@ class TestObjectiveFunction(unittest.TestCase):
         self.assertEqual(self.objective(self.thetas), 31 / 4)
 
     def test_immutability(self):
-        original = self.thetas
+        original = self.thetas.copy()
         self.objective(self.thetas)
         np.testing.assert_equal(original, self.thetas)
+
+    def test_objective_value2(self):
+        robot_arm = RobotArm(
+            lengths=(1, 2,),
+            destinations=((1, -1,), (1, 1,),)
+        )
+        thetas = np.array((0, np.pi/2, np.pi/2, np.pi/4,))
+
+        objective_func = generate_objective_function(robot_arm)
+        objective_value = objective_func(thetas)
+        self.assertEqual(objective_value, np.pi**2 * 5/16)
+
+        objective_gradient_func = generate_objective_gradient_function(robot_arm)
+        objective_gradient = objective_gradient_func(thetas)
+        testing.assert_array_equal(objective_gradient, np.array((-np.pi, np.pi/2, np.pi, -np.pi/2,)))
