@@ -47,32 +47,32 @@ def BFGS(x0, f, grad_f, epsilon, alpha_steps=20, c1=1e-4, c2=0.9):
     max_it = int(1e5)
     for i in range(0, max_it):
         # Stop test
-        if np.sqrt(2 * f(x_k)) < epsilon:
+        if norm_of_grad_k < epsilon:
             print('BFGS converged in {} iterations.'.format(i))
             return x_k
 
-        if norm_of_grad_k < epsilon:
-            print("BFGS found a stationary point after iteration {}.".format(i))
-            stationary_point_visits += 1
+        # if norm_of_grad_k < epsilon:
+        #     print("BFGS found a stationary point after iteration {}.".format(i))
+        #     stationary_point_visits += 1
 
-            # Try to move away from stationary points that are not (global) minimizers
-            number = 10 * n ** 2
-            length = 2 ** stationary_point_visits * 4 / 180 * np.pi * np.sqrt(n)
+        #     # Try to move away from stationary points that are not (global) minimizers
+        #     number = 10 * n ** 2
+        #     length = 2 ** stationary_point_visits * 4 / 180 * np.pi * np.sqrt(n)
 
-            noise = np.random.uniform(low=-1.0, high=1.0, size=(n, number))
-            noise = length * noise / np.linalg.norm(noise, axis=0)
-            candidates = np.apply_along_axis(f, axis=0, arr=x_k.reshape(n, 1) + noise)
-            best = np.argmin(candidates, axis=0)
+        #     noise = np.random.uniform(low=-1.0, high=1.0, size=(n, number))
+        #     noise = length * noise / np.linalg.norm(noise, axis=0)
+        #     candidates = np.apply_along_axis(f, axis=0, arr=x_k.reshape(n, 1) + noise)
+        #     best = np.argmin(candidates, axis=0)
 
-            p_k = noise[:, best]
-            alpha = min(np.linspace(0, 10, 1000), key=lambda a: f(x_k + a * p_k))
+        #     p_k = noise[:, best]
+        #     alpha = min(np.linspace(0, 10, 1000), key=lambda a: f(x_k + a * p_k))
 
-            # Reset BFGS
-            x_k += alpha * p_k
-            grad_k = grad_f(x_k)
+        #     # Reset BFGS
+        #     x_k += alpha * p_k
+        #     grad_k = grad_f(x_k)
 
-            H_k = I  # initial inverse hessian approximation
-            first = True
+        #     H_k = I  # initial inverse hessian approximation
+        #     first = True
 
         else:
             # Calculate direction and stepsize
