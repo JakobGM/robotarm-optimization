@@ -9,6 +9,7 @@ from constraints import (
     generate_constraint_gradients_function,
 )
 
+
 def generate_quadratically_penalized_objective(robot_arm):
     '''
     Given a RobotArm object with a valid joint lenghts and destinations
@@ -49,7 +50,9 @@ def generate_quadratically_penalized_objective_gradient(robot_arm):
 
         constraint_gradients = constraint_gradients_func(thetas)
         constraints = constraints_func(thetas)
-        return constraints.reshape(1, 2*s) * constraint_gradients
+        assert constraint_gradients.shape == (n*s, 2*s,)
+        assert constraints.shape == (2*s,)
+        return constraints.reshape((1, 2*s,)) * constraint_gradients
 
 
     def quadratically_penalized_objective_gradient(thetas, mu):
