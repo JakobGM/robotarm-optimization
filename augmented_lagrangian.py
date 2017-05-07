@@ -53,7 +53,8 @@ def generate_simple_augmented_lagrangian_function():
 
     def simple_augmented_lagrangian_function(same_robot):
         lagrange_multipliers = np.zeros(2 * robot.s)
-        augmented_lagrangian_method(lagrange_multipliers, 1, 1e-2, 3e-3, 100, same_robot, generate_initial_guess=False)
+        return augmented_lagrangian_method(lagrange_multipliers, 1, 1e-2, 3e-3, 100, same_robot,
+                                           generate_initial_guess=False, convergence_analysis=True)
 
     return simple_augmented_lagrangian_function
 
@@ -100,7 +101,7 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
 
             print("Augmented lagrangian method successful")
             if convergence_analysis is True:
-                return iterates
+                return iterates, generate_objective_function(robot)
             else:
                 return thetas
 
