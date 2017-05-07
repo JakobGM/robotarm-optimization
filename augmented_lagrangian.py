@@ -49,6 +49,18 @@ def generate_augmented_lagrangian_objective_gradient(robot_arm, lagrange_multipl
     return augmented_lagrangian_objective_gradient
 
 
+def generate_simple_augmented_lagrangian_function(this_robot):
+    same_robot = this_robot
+
+    def simple_augmented_lagrangian_function(same_robot):
+        lagrange_multipliers = np.zeros(2 * robot.s)
+        augmented_lagrangian_method(lagrange_multipliers, 1, 1e-2, 3e-3, 100, same_robot, generate_initial_guess=False)
+
+    return simple_augmented_lagrangian_function
+
+
+
+
 def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, initial_tolerance,
                                 global_tolerance, max_iter, robot, generate_initial_guess=True,
                                 convergence_analysis=False):
