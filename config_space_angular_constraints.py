@@ -3,24 +3,21 @@ import scipy.spatial
 import matplotlib.pyplot as plt
 
 
-def generate_config_space_points(l, c, n_configs=2e4):
-    n = np.size(l)
+def generate_config_space_points(lengths, c, n_configs=2e4):
+    n = np.size(lengths)
     n_angles = int(np.power(n_configs, 1 / n))
 
     angles1 = np.linspace(-c, c, num=n_angles)
     log_space = c - np.logspace(-3, np.log10(c), n_angles//2)
     angles2 = np.hstack((-log_space, log_space[:-1][::-1]))
 
-    tuple_angles1 = tuple([np.hstack((angles1, angles2)) for _ in range(0, n)])
-    tuple_angles2 = tuple([angles2 for _ in range(0, n)])
-    thetas1 = np.array([np.meshgrid(*tuple_angles1)]).T.reshape(-1, n)
-    thetas2 = np.array([np.meshgrid(*tuple_angles2)]).T.reshape(-1, n)
-    thetas = np.vstack((thetas1))
+    tuple_angles = tuple([np.hstack((angles1, angles2)) for _ in range(0, n)])
+    thetas = np.array([np.meshgrid(*tuple_angles)]).T.reshape(-1, n)
     n_thetas = np.size(thetas, 0)
 
     points = np.zeros((n_thetas, 2))
     for i in range(0, n_thetas):
-        points[i] = position(l, thetas[i])
+        points[i] = position(lengths, thetas[i])
 
     neighbor_tree = scipy.spatial.cKDTree(points, leafsize=100)
 
@@ -75,5 +72,5 @@ if __name__ == '__main__':
     plt.xlabel('$x$')
     plt.ylabel('$y$')
 
-    # plt.savefig('figures/config_space_angular_constraints.pdf', bbox_inches='tight')
+    # plt.savefig('figures/config_space_angular_constraints.png', bbox_inches='tight', dpi=500)
     plt.show()
