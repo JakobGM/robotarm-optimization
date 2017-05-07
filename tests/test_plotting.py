@@ -1,26 +1,14 @@
 import unittest
 import numpy as np
-from numpy import pi
-import matplotlib.pyplot as plt
 
-from robot_arm import RobotArm
 from plotting import path_figure
+from fixtures import robot_arm1
 
 class TestPlotting(unittest.TestCase):
     def setUp(self):
-        lengths = (3, 2, 2,)
-        destinations = (
-            (5, 4, 6, 4, 5),
-            (0, 2, 0.5, -2, -1),
-        )
-        theta = (pi, pi / 2, 0,)
-        self.robot_arm = RobotArm(
-            lengths=lengths,
-            destinations=destinations,
-            theta=theta
-        )
-        n = len(lengths)
-        s = len(destinations[0])
+        self.robot_arm = robot_arm1
+        n = len(self.robot_arm.lengths)
+        s = len(self.robot_arm.destinations[0])
         total_joints = n * s
         self.theta_matrix = np.arange(total_joints).reshape((n, s))
 
