@@ -9,7 +9,7 @@ from quadratic_penalty import generate_quadratically_penalized_objective
 
 
 class RobotArm:
-    def __init__(self, lengths, destinations, theta=None, precision=1e-2):
+    def __init__(self, lengths, destinations, theta=None, precision=1e-2, angular_constraint=None):
         # Input validation
         if not len(destinations) == 2:
             raise ValueError('Destinations are not in R2')
@@ -27,6 +27,8 @@ class RobotArm:
         self.destinations.setflags(write=False)
         self.s = self.destinations.shape[1]
         self.precision = precision
+        if angular_constraint is not None:
+            self.angular_constraint = angular_constraint
 
         if theta is None:
             self._theta = np.zeros(self.n)
