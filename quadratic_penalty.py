@@ -1,4 +1,5 @@
 import numpy as np
+from functools import partial
 
 from problem import (
     generate_objective_function,
@@ -8,6 +9,8 @@ from constraints import (
     generate_constraints_function,
     generate_constraint_gradients_function,
 )
+from methods import BFGS, MaximumIterationError, gradient_descent
+from plotting import path_figure
 
 
 def generate_quadratically_penalized_objective(robot_arm):
@@ -66,3 +69,35 @@ def generate_quadratically_penalized_objective_gradient(robot_arm):
 
 
     return quadratically_penalized_objective_gradient
+
+def quadratic_penalty_method(robot_arm):
+    n = robot_arm.n
+    s = robot_arm.s
+
+    Q = generate_quadratically_penalized_objective(robot_arm)
+    grad_Q = generate_quadratically_penalized_objective_gradient(robot_arm)
+
+    thetas = robot_arm.generate_initial_guess(show=False)
+
+    mu = 1
+    tau = 1e-4
+
+    def get_f(mu):
+        return partial(Q, mu=mu)
+
+    def get_grad_f(mu):
+        return partial(grad_Q, mu=mu)
+
+    print('Starting quadratic penalty method')
+    for yolo in range(1000):
+        f = get_f(mu)
+        grad_f = get_grad_f(mu)
+        try:
+            thetas = BFGS(thetas, f, grad_f, tau)
+        except MaximumIterationError:
+            print('Reached MaximumIterationError in loop number {}'.format(yolo))
+            break
+        mu = 1.5 * mu
+        tau = 0.5 * tau
+
+    return thetas
