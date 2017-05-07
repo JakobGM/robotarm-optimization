@@ -30,6 +30,8 @@ class RobotArm:
             self.angular_constraint = angular_constraint
             self.config_space_points, self.neighbor_tree = generate_config_space_points(self.lengths,
                                                                                         angular_constraint)
+        else:
+            self.angular_constraint = None
 
         if theta is None:
             self._theta = np.zeros(self.n)

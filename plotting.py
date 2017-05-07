@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.patches import Wedge
 import numpy as np
+from config_space_angular_constraints import plot_config_space
 
 
 def path_figure(theta_matrix, robot_arm, show=True):
@@ -38,6 +39,8 @@ def path_figure(theta_matrix, robot_arm, show=True):
 
 def set_axis_options(ax, robot_arm):
     ax.set_autoscale_on(False)
+    if robot_arm.angular_constraints is not None:
+        plot_config_space(robot_arm.config_space_points, ax)
 
     ax.axhline(y=0, color='grey')
     ax.axvline(x=0, color='grey')
@@ -64,16 +67,17 @@ def plot_position(axis, theta, robot_arm):
         axis.text(p[0], p[1], str(index + 1), fontsize=14, color=point.get_color())
 
     # Plot configuration space of robot
-    configuration_space = Wedge(
-        (0, 0),
-        r=robot_arm.reach,
-        theta1=0,
-        theta2=360,
-        width=robot_arm.reach - robot_arm.inner_reach,
-        facecolor='grey',
-        alpha=0.3,
-        edgecolor='black',
-        linewidth=0.6
-    )
+    if robot_arm.angular_constraints is None:
+        configuration_space = Wedge(
+            (0, 0),
+            r=robot_arm.reach,
+            theta1=0,
+            theta2=360,
+            width=robot_arm.reach - robot_arm.inner_reach,
+            facecolor='grey',
+            alpha=0.3,
+            edgecolor='black',
+            linewidth=0.6
+        )
 
-    axis.add_patch(configuration_space)
+        axis.add_patch(configuration_space)
