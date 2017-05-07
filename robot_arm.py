@@ -5,8 +5,7 @@ from matplotlib.animation import ImageMagickWriter
 import plotting
 from methods import BFGS
 from plotting import path_figure
-from quadratic_penalty import generate_quadratically_penalized_objective
-
+from config_space_angular_constraints import generate_config_space_points
 
 class RobotArm:
     def __init__(self, lengths, destinations, theta=None, precision=1e-2, angular_constraint=None):
@@ -29,6 +28,8 @@ class RobotArm:
         self.precision = precision
         if angular_constraint is not None:
             self.angular_constraint = angular_constraint
+            self.config_space_points, self.neighbor_tree = generate_config_space_points(self.lengths,
+                                                                                        angular_constraint)
 
         if theta is None:
             self._theta = np.zeros(self.n)
