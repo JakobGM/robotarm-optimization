@@ -49,16 +49,13 @@ def generate_augmented_lagrangian_objective_gradient(robot_arm, lagrange_multipl
     return augmented_lagrangian_objective_gradient
 
 
-def generate_simple_augmented_lagrangian_function(this_robot):
-    same_robot = this_robot
+def generate_simple_augmented_lagrangian_function():
 
     def simple_augmented_lagrangian_function(same_robot):
         lagrange_multipliers = np.zeros(2 * robot.s)
         augmented_lagrangian_method(lagrange_multipliers, 1, 1e-2, 3e-3, 100, same_robot, generate_initial_guess=False)
 
     return simple_augmented_lagrangian_function
-
-
 
 
 def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, initial_tolerance,
@@ -69,7 +66,7 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
     if generate_initial_guess is True:
         thetas = robot.generate_initial_guess()
     elif generate_initial_guess == "random":
-        thetas = np.random.rand(robot.n*robot.s) * 2*np.pi
+        thetas = np.random.rand(robot.n * robot.s) * 2 * np.pi
     else:
         thetas = np.zeros(robot.n * robot.s)
 
@@ -79,7 +76,7 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
 
     # Saving the iterates if convergence analysis is active
     if convergence_analysis is True:
-        iterates = thetas.copy().reshape((robot.n*robot.s, 1))
+        iterates = thetas.copy().reshape((robot.n * robot.s, 1))
 
     print("Starting augmented lagrangian method")
     for i in range(max_iter):
@@ -110,9 +107,10 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
     print("Augmented lagrangian method unsuccessful")
 
 
-coordinates_tuple = ((5, 3, -7, 9, 4), (4, 2, 3, 2, 1))
-lengths_tuple = (2, 3, 4, 2)
+coordinates_tuple = ((5, 4, 6, 4, 5), (0, 2, 0.5, -2, -1))
+lengths_tuple = (3, 2, 2)
 robot = RobotArm(lengths_tuple, coordinates_tuple)
 lambdas = np.zeros(2 * robot.s)
+simple = generate_simple_augmented_lagrangian_function()
+simple(robot)
 
-augmented_lagrangian_method(lambdas, 4, 1e-2, 5e-3, 100, robot)
