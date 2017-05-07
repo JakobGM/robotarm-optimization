@@ -83,7 +83,7 @@ def plot_convergence(xs, objective, robot_arm, show=False):
 
     fig = plt.gcf()
     fig.set_size_inches(18.5, 5)
-    plt.savefig('equality_constraint.pdf', bbox_inches='tight')
+    plt.savefig('figures/equality_constraint.pdf', bbox_inches='tight')
 
     if show is True:
         plt.show()
