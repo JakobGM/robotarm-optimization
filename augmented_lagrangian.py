@@ -97,7 +97,7 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
 
         current_norm = np.linalg.norm(augmented_lagrangian_objective_gradient(thetas))
         if current_norm < global_tolerance:
-            path_figure(thetas.reshape((robot.n, robot.s), order='F'), robot)
+            path_figure(thetas.reshape((robot.n, robot.s), order='F', show=False), robot)
 
             print("Augmented lagrangian method successful")
             if convergence_analysis is True:
