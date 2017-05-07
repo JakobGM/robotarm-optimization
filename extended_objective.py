@@ -14,6 +14,7 @@ def generate_extended_objective_gradient_function(robot_arm, barrier_penalty):
         objective_gradient = objective_gradient_function(thetas)
         slack_objective_gradient = 1/slack * barrier_penalty
         return np.append(objective_gradient, slack_objective_gradient)
+
     return extended_objective_gradient_function
 
 
@@ -26,4 +27,5 @@ def generate_extended_objective_function(robot_arm, barrier_penalty):
         thetas = thetas_slack[:n*s]
         slack = thetas_slack[n*s:]
         return objective_function(thetas) - barrier_penalty*np.sum(np.log(slack))
+
     return extended_objective

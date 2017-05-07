@@ -35,17 +35,11 @@ def generate_extended_constraints_gradient_function(robot_arm):
         constraints_gradient = np.concatenate((constraints_gradient, downward_extension))
         assert constraints_gradient.shape == (3*n*s, 2*s)
         additional_constraints_gradient = np.zeros((3*n*s, 2*n*s))
-        counter = 0
-        for j in range(0, 2, 2*n*s):
-            counter += 1
-            for i in range(n*s):
-                if i == counter:
-                    additional_constraints_gradient[i, j] = 1
-                    additional_constraints_gradient[i, j+1] = -1
-        for q in range(2*n*s):
-            for p in range(n*s, 3*n*s):
-                if q == p:
-                    additional_constraints_gradient[p, q] = -1
+        odd_additional_constraints_gradient_upper = np.identity(n * s)
+        even_additional_constraints_gradient_upper = -np.identity(n * s)
+        additional_constraints_gradient[:n * s, 0::2] = odd_additional_constraints_gradient_upper
+        additional_constraints_gradient[:n * s, 1::2] = even_additional_constraints_gradient_upper
+        additional_constraints_gradient[n * s:, :] = -np.identity(2 * n * s)
         return np.concatenate((constraints_gradient, additional_constraints_gradient), axis=1)
 
     return extended_constraints_gradient_function
