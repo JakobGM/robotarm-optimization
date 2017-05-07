@@ -5,7 +5,6 @@ from methods import BFGS
 from plotting import path_figure
 from problem import generate_objective_gradient_function, generate_objective_function
 from robot_arm import RobotArm
-import random
 
 
 def generate_lagrange_multiplier(robot_arm):
@@ -30,7 +29,6 @@ def generate_augmented_lagrangian_objective(robot_arm, lagrange_multiplier, mu):
 
 
 def generate_augmented_lagrangian_objective_gradient(robot_arm, lagrange_multiplier, mu):
-    n = robot_arm.n
     s = robot_arm.s
 
     constraints_function = generate_constraints_function(robot_arm)
@@ -52,17 +50,25 @@ def generate_augmented_lagrangian_objective_gradient(robot_arm, lagrange_multipl
 
 
 def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, initial_tolerance,
-                                global_tolerance, max_iter, robot, generate_initial_guess=True):
+                                global_tolerance, max_iter, robot, generate_initial_guess=True,
+                                convergence_analysis=False):
     lagrange_multiplier_function = generate_lagrange_multiplier(robot)
+
     if generate_initial_guess is True:
         thetas = robot.generate_initial_guess()
     elif generate_initial_guess == "random":
         thetas = np.random.rand(robot.n*robot.s) * 2*np.pi
     else:
         thetas = np.zeros(robot.n * robot.s)
+
     mu = initial_penalty
     tolerance = initial_tolerance
     lagrange_multiplier = initial_lagrange_multiplier
+
+    # Saving the iterates if convergence analysis is active
+    if convergence_analysis is True:
+        iterates = thetas.copy().reshape((robot.n*robot.s, 1))
+
     print("Starting augmented lagrangian method")
     for i in range(max_iter):
         augmented_lagrangian_objective = generate_augmented_lagrangian_objective(robot, lagrange_multiplier, mu)
@@ -75,11 +81,19 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
         mu *= 1.4
         tolerance *= 0.7
 
+        # Adding the new thetas to iterates used for convergence analysis
+        if convergence_analysis is True:
+            iterates = np.concatenate((iterates, thetas.reshape(robot.n * robot.s, 1)), axis=1)
+
         current_norm = np.linalg.norm(augmented_lagrangian_objective_gradient(thetas))
         if current_norm < global_tolerance:
             path_figure(thetas.reshape((robot.n, robot.s), order='F'), robot)
+
             print("Augmented lagrangian method successful")
-            return thetas
+            if convergence_analysis is True:
+                return iterates
+            else:
+                return thetas
 
     print("Augmented lagrangian method unsuccessful")
 
