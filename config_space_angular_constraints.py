@@ -3,7 +3,7 @@ import scipy.spatial
 import matplotlib.pyplot as plt
 
 
-def generate_config_space_points(l, c, n_configs=1e5):
+def generate_config_space_points(l, c, n_configs=2e4):
     n = np.size(l)
     n_angles = int(np.power(n_configs, 1 / n))
 
@@ -11,11 +11,11 @@ def generate_config_space_points(l, c, n_configs=1e5):
     log_space = c - np.logspace(-3, np.log10(c), n_angles//2)
     angles2 = np.hstack((-log_space, log_space[:-1][::-1]))
 
-    tuple_angles1 = tuple([angles1 for _ in range(0, n)])
+    tuple_angles1 = tuple([np.hstack((angles1, angles2)) for _ in range(0, n)])
     tuple_angles2 = tuple([angles2 for _ in range(0, n)])
     thetas1 = np.array([np.meshgrid(*tuple_angles1)]).T.reshape(-1, n)
     thetas2 = np.array([np.meshgrid(*tuple_angles2)]).T.reshape(-1, n)
-    thetas = np.vstack((thetas1, thetas2))
+    thetas = np.vstack((thetas1))
     n_thetas = np.size(thetas, 0)
 
     points = np.zeros((n_thetas, 2))
@@ -43,7 +43,7 @@ def plot_config_space(points, axis):
 
 
 def is_close_to_config_space(target_point, neighbor_tree, lengths):
-    r = np.sum(lengths) / 50
+    r = np.sum(lengths) / 100
     neighbors = neighbor_tree.query_ball_point(target_point, r)
     n_neighbors = np.size(neighbors)
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     c = np.pi / 5
 
     target_point1 = np.array([1.2, 5.24])
-    target_point2 = np.array([3.967, 3.750])
+    target_point2 = np.array([4.013, 3.695])
     points, neighbor_tree = generate_config_space_points(lengths, c)
 
     print(is_close_to_config_space(target_point1, neighbor_tree, lengths))
