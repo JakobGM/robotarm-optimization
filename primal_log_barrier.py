@@ -2,9 +2,11 @@ import numpy as np
 
 from extended_constraints import generate_extended_constraints_gradient_function, generate_extended_constraints_function
 from extended_objective import generate_extended_objective_function, generate_extended_objective_gradient_function
+from problem import generate_objective_function
 from methods import BFGS, gradient_descent
 from plotting import path_figure
 from robot_arm import RobotArm
+from config_space_angular_constraints import is_close_to_config_space
 from scipy.optimize import minimize
 
 
@@ -48,18 +50,26 @@ def extended_augmented_lagrangian_method(initial_lagrange_multiplier, initial_pe
                                          global_tolerance, max_iter, robot, barrier_penalty,
                                          generate_initial_guess=False,
                                          convergence_analysis=False):
+    for i in range(robot.s):
+        if not is_close_to_config_space(robot.destinations[:, i], robot.neighbor_tree, robot.lengths):
+            print("Destination points not in configuration space")
+            return None
 
     lagrange_multiplier_function = generate_extended_lagrange_multiplier(robot)
 
     if generate_initial_guess is True:
-        thetas_slack = robot.generate_initial_guess()
+        thetas_slack = np.zeros(3 * robot.n * robot.s, )
+        thetas_slack[:robot.n * robot.s] = robot.generate_initial_guess() + np.pi
+        thetas_slack[robot.n * robot.s::2] = thetas_slack[:robot.n * robot.s] + robot.angular_constraint
+        thetas_slack[robot.n * robot.s + 1::2] = robot.angular_constraint - thetas_slack[:robot.n * robot.s]
     elif generate_initial_guess == "random":
-        pass
+        thetas_slack = np.zeros(3 * robot.n * robot.s, )
+        thetas_slack[:robot.n * robot.s] = np.random.rand(robot.n * robot.s) * 2 * np.pi
+        thetas_slack[robot.n * robot.s::2] = thetas_slack[:robot.n * robot.s] + robot.angular_constraint
+        thetas_slack[robot.n * robot.s + 1::2] = robot.angular_constraint - thetas_slack[:robot.n * robot.s]
+
     else:
         thetas_slack = np.zeros(3*robot.n*robot.s, )
-        thetas_slack[:robot.n*robot.s] = np.random.rand(robot.n * robot.s) * 2 * np.pi
-        thetas_slack[robot.n*robot.s::2] = thetas_slack[:robot.n*robot.s] + robot.angular_constraint
-        thetas_slack[robot.n*robot.s+1::2] = robot.angular_constraint - thetas_slack[:robot.n*robot.s]
 
     mu = initial_penalty
     tolerance = initial_tolerance
@@ -103,8 +113,8 @@ def extended_augmented_lagrangian_method(initial_lagrange_multiplier, initial_pe
 
 
 coordinates_tuple = ((5, 4, 6, 4, 5), (0, 2, 0.5, -2, -1))
-lengths_tuple = (3, 2, 2)
-robot = RobotArm(lengths_tuple, coordinates_tuple, angular_constraint=np.pi / 8)
+lengths_tuple = (3, 1, 1, 1, 1)
+robot = RobotArm(lengths_tuple, coordinates_tuple, angular_constraint=np.pi / 2)
 lagrange_multipliers = np.zeros(2 * robot.s * (robot.n + 1))
 extended_augmented_lagrangian_method(lagrange_multipliers, 0.1, 1e-2, 1e-3, 20, robot, 1e-6,
-                                     generate_initial_guess=False, convergence_analysis=False)
+                                     generate_initial_guess=True, convergence_analysis=False)

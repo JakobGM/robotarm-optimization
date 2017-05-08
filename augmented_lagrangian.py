@@ -62,6 +62,7 @@ def generate_simple_augmented_lagrangian_function():
 def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, initial_tolerance,
                                 global_tolerance, max_iter, robot, generate_initial_guess=True,
                                 convergence_analysis=False):
+    objective_function = generate_objective_function(robot)
     lagrange_multiplier_function = generate_lagrange_multiplier(robot)
 
     if generate_initial_guess is True:
@@ -97,7 +98,8 @@ def augmented_lagrangian_method(initial_lagrange_multiplier, initial_penalty, in
 
         current_norm = np.linalg.norm(augmented_lagrangian_objective_gradient(thetas))
         if current_norm < global_tolerance:
-            path_figure(thetas.reshape((robot.n, robot.s), order='F'), robot, show=False)
+            path_figure(thetas.reshape((robot.n, robot.s), order='F'), robot, show=True)
+            print('The objective function evaluates to:', objective_function(thetas))
 
             print("Augmented lagrangian method successful")
             if convergence_analysis is True:

@@ -23,15 +23,18 @@ def path_figure(theta_matrix, robot_arm, show=True):
 
     # Set up plot style options
     plt.style.use('ggplot')
-    fig, axes = plt.subplots(nrows=1, ncols=num_of_destinations)
+    fig, axes = plt.subplots(nrows=2, ncols=3)
+    np.ravel(axes)[-1].axis('off')
+    axes = np.ravel(axes)[:-1]
     for ax in np.ravel(axes):
         set_axis_options(ax, robot_arm)
 
     # Plotting content of each subplot
     for index, theta in enumerate(theta_matrix.T):
-        plot_position(axes[index], theta, robot_arm)
+        plot_position(np.ravel(axes)[index], theta, robot_arm)
 
     if show is True:
+        #plt.savefig('figures/inequality.png', bbox_inches='tight', dpi=500)
         plt.show()
 
     return fig
@@ -39,7 +42,8 @@ def path_figure(theta_matrix, robot_arm, show=True):
 
 def set_axis_options(ax, robot_arm):
     ax.set_autoscale_on(False)
-    if robot_arm.angular_constraints is not None:
+    ax.set_aspect('equal')
+    if robot_arm.angular_constraint is not None:
         plot_config_space(robot_arm.config_space_points, ax)
 
     ax.axhline(y=0, color='grey')
@@ -51,7 +55,7 @@ def set_axis_options(ax, robot_arm):
     max_y = abs(max(robot_arm.destinations, key=lambda p: abs(p[1]))[1])
     m = max(max_x, max_y, robot_arm.reach)
 
-    ax.set_xlim(-a * m, a * m)
+    ax.set_xlim(0, a * m)
     ax.set_ylim(-a * m, a * m)
 
 
@@ -67,7 +71,7 @@ def plot_position(axis, theta, robot_arm):
         axis.text(p[0], p[1], str(index + 1), fontsize=14, color=point.get_color())
 
     # Plot configuration space of robot
-    if robot_arm.angular_constraints is None:
+    if robot_arm.angular_constraint is None:
         configuration_space = Wedge(
             (0, 0),
             r=robot_arm.reach,

@@ -36,7 +36,7 @@ def position(lengths, theta):
 
 
 def plot_config_space(points, axis):
-    axis.scatter(points[:, 0], points[:, 1], color='grey', alpha=0.01)
+    axis.scatter(points[:, 0], points[:, 1], color='grey', alpha=1)
 
 
 def is_close_to_config_space(target_point, neighbor_tree, lengths):
