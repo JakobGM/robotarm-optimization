@@ -55,7 +55,7 @@ def set_axis_options(ax, robot_arm):
     max_y = abs(max(robot_arm.destinations, key=lambda p: abs(p[1]))[1])
     m = max(max_x, max_y, robot_arm.reach)
 
-    ax.set_xlim(0, a * m)
+    ax.set_xlim(-a*m, a * m)
     ax.set_ylim(-a * m, a * m)
 
 

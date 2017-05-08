@@ -59,7 +59,7 @@ def extended_augmented_lagrangian_method(initial_lagrange_multiplier, initial_pe
 
     if generate_initial_guess is True:
         thetas_slack = np.zeros(3 * robot.n * robot.s, )
-        thetas_slack[:robot.n * robot.s] = robot.generate_initial_guess() + np.pi
+        thetas_slack[:robot.n * robot.s] = robot.generate_initial_guess()
         thetas_slack[robot.n * robot.s::2] = thetas_slack[:robot.n * robot.s] + robot.angular_constraint
         thetas_slack[robot.n * robot.s + 1::2] = robot.angular_constraint - thetas_slack[:robot.n * robot.s]
     elif generate_initial_guess == "random":
@@ -99,7 +99,7 @@ def extended_augmented_lagrangian_method(initial_lagrange_multiplier, initial_pe
             iterates = np.concatenate((iterates, thetas_slack.reshape(robot.n * robot.s, 1)), axis=1)
 
         current_norm = np.linalg.norm(augmented_lagrangian_objective_gradient(thetas_slack))
-        if current_norm < global_tolerance or np.linalg.norm(previous_thetas_slack - thetas_slack) < 0.01:
+        if current_norm < global_tolerance or np.linalg.norm(previous_thetas_slack - thetas_slack) < 0.1:
             path_figure(thetas_slack[:robot.n*robot.s].reshape((robot.n, robot.s), order='F'), robot, show=True)
 
             print("Augmented lagrangian method successful")
@@ -112,9 +112,9 @@ def extended_augmented_lagrangian_method(initial_lagrange_multiplier, initial_pe
     print("Augmented lagrangian method unsuccessful")
 
 
-coordinates_tuple = ((5, 4, 6, 4, 5), (0, 2, 0.5, -2, -1))
+coordinates_tuple = ((-1, -3, -3, 0, 3), (5, 3, 4, 5, 2))
 lengths_tuple = (3, 1, 1, 1, 1)
 robot = RobotArm(lengths_tuple, coordinates_tuple, angular_constraint=np.pi / 2)
 lagrange_multipliers = np.zeros(2 * robot.s * (robot.n + 1))
-extended_augmented_lagrangian_method(lagrange_multipliers, 0.1, 1e-2, 1e-3, 20, robot, 1e-6,
+extended_augmented_lagrangian_method(lagrange_multipliers, 0.1, 1e-2, 5e-3, 4, robot, 1e-6,
                                      generate_initial_guess=True, convergence_analysis=False)

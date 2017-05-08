@@ -12,7 +12,7 @@ def generate_extended_objective_gradient_function(robot_arm, barrier_penalty):
         slack = thetas_slack[n*s:]
         assert thetas_slack.shape == (n*s + 2*n*s, )
         objective_gradient = objective_gradient_function(thetas)
-        #slack += 1e-8*np.isclose(slack, np.zeros(2 * robot_arm.n * robot_arm.s))
+        #slack += 1e-2*np.isclose(slack, np.zeros(2 * robot_arm.n * robot_arm.s))
         slack_objective_gradient = 1/slack * barrier_penalty
         return np.append(objective_gradient, slack_objective_gradient)
 
@@ -27,9 +27,9 @@ def generate_extended_objective_function(robot_arm, barrier_penalty):
     def extended_objective(thetas_slack):
         thetas = thetas_slack[:n*s]
         slack = thetas_slack[n*s:]
-        #slack += 1e-8*np.isclose(slack, np.zeros(2*robot_arm.n*robot_arm.s))
+        #slack += 1e-2*np.isclose(slack, np.zeros(2*robot_arm.n*robot_arm.s))
         #while np.any(slack <= 0):
-        #    slack += (slack <= 0)*1e-8
+        #    slack += (slack <= 0)*1e-2
         return objective_function(thetas) - barrier_penalty*np.sum(np.log(slack))
 
     return extended_objective
